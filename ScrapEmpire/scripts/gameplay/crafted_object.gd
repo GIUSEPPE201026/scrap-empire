@@ -1,0 +1,107 @@
+extends CharacterBody3D
+var craft_id: String = ""
+var kind: String = ""
+var towing: Node3D
+var wheels: Array[Node3D] = []
+var load_visual: Node3D
+var load_signature: String = ""
+
+func _ready() -> void:
+	add_to_group("crafted_objects")
+	if kind=="field_depot":
+		add_to_group("field_depot")
+	collision_layer = 1
+	collision_mask = 1
+	if kind in preload("res://scripts/gameplay/yard_structures.gd").KINDS:
+		preload("res://scripts/gameplay/yard_structures.gd").build(self,kind)
+		return
+	var shape = CollisionShape3D.new()
+	var box = BoxShape3D.new()
+	box.size = Vector3(1.3,0.8,1.35) if kind=="handcart" else Vector3(0.65,1.9,0.65)
+	if kind=="field_depot":
+		box.size=Vector3(1.5,1.1,1.5)
+	shape.shape = box
+	shape.position.y = box.size.y/2
+	add_child(shape)
+	if kind=="work_lamp":
+		var light = OmniLight3D.new()
+		light.position = Vector3(0,1.9,-0.15)
+		light.omni_range = float(GameState.logistics_def.crafting.work_lamp.range)
+		light.light_energy = 3
+		light.light_color = Color("#ffe7bd")
+		add_child(light)
+	if DisplayServer.get_name()=="headless":
+		return
+	var art = preload("res://scripts/gameplay/scrapyard_art.gd").new()
+	if kind=="handcart":
+		wheels=preload("res://scripts/gameplay/handcart_art.gd").build(self,art)
+	elif kind=="field_depot":
+		art.beveled_box(self,Vector3(1.5,0.95,1.5),Vector3(0,0.52,0),art.MINT,true)
+		art.beveled_box(self,Vector3(1.58,0.14,1.58),Vector3(0,1.07,0),art.YELLOW)
+		for side in [-1,1]:
+			art.box(self,Vector3(0.08,1,1.56),Vector3(side*0.58,0.55,0),art.STEEL)
+		art.sign_text(self,"DEPOSITO",Vector3(0,1.65,0),28,true)
+	else:
+		for index in 3:
+			art.beam(self,Vector3(0,0.65,0),Vector3(sin(index*TAU/3)*0.4,0.04,cos(index*TAU/3)*0.4),0.05,art.STEEL)
+		art.cylinder(self,0.035,1.5,Vector3(0,1,0),art.YELLOW,10)
+		art.box(self,Vector3(0.65,0.42,0.15),Vector3(0,1.85,0),art.YELLOW)
+		art.box(self,Vector3(0.54,0.31,0.03),Vector3(0,1.85,-0.09),Color("#fff1ca"))
+		var bubble = art.box(self,Vector3(0.52,0.04,0.03),Vector3(0,1.85,-0.11),Color.WHITE)
+		var glow = bubble.material_override.duplicate()
+		glow.emission_enabled = true
+		glow.emission = Color("#ffe7bd")
+		glow.emission_energy_multiplier = 2
+		bubble.material_override = glow
+
+func _physics_process(delta: float) -> void:
+	if not is_instance_valid(towing):
+		return
+	if is_instance_valid(towing._mounted_vehicle) or not towing._game_state.operations.held.is_empty() or global_position.distance_to(towing.global_position)>4:
+		towing._stop_cart()
+		return
+	var target: Vector3 = towing.global_position+towing.global_basis.z*1.65
+	var offset: Vector3 = target-global_position
+	offset.y = 0
+	var speed: float = minf(offset.length()*4,float(GameState.logistics_def.crafting.handcart.tow_speed_mps)+0.5)
+	var direction: Vector3 = offset.normalized()
+	velocity.x = direction.x*speed
+	velocity.z = direction.z*speed
+	velocity.y = 0 if is_on_floor() else velocity.y-18*delta
+	if direction.length()>0.1:
+		rotation.y = lerp_angle(rotation.y,atan2(-direction.x,-direction.z),delta*5)
+	var previous: Vector3 = global_position
+	move_and_slide()
+	for wheel in wheels:
+		wheel.rotate_y(previous.distance_to(global_position)/0.28)
+
+func update_load(cargo: Dictionary) -> void:
+	if DisplayServer.get_name()=="headless" or kind!="handcart":
+		return
+	var signature: String = JSON.stringify(cargo)
+	if signature==load_signature:
+		return
+	load_signature = signature
+	if is_instance_valid(load_visual):
+		remove_child(load_visual)
+		load_visual.queue_free()
+	load_visual = Node3D.new()
+	add_child(load_visual)
+	var art = preload("res://scripts/gameplay/scrapyard_art.gd").new()
+	var families: Array = ["metal","plastic","electronics","copper","aluminum","glass","rubber"]
+	var index: int = 0
+	for material in cargo:
+		var family: int = families.find(material)
+		if family<0 or int(cargo[material])<=0:
+			continue
+		for number in mini(2,int(cargo[material])):
+			var piece = Node3D.new()
+			piece.position = Vector3(-0.2+(index%2)*0.4,0.47+(index/4)*0.2,-0.3+((index/2)%2)*0.5)
+			piece.scale = Vector3.ONE*0.48
+			piece.rotation.y = index*0.65
+			load_visual.add_child(piece)
+			preload("res://scripts/gameplay/scrap_catalog.gd").build(piece,family,number,art)
+			index += 1
+			if index>=8:
+				return
+

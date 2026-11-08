@@ -1,0 +1,142 @@
+extends "res://tests/crafting_test.gd"
+const MOB=preload("res://scripts/economy/extra_mobility.gd")
+
+func vehicle_picture(player: Node3D, filename: String) -> void:
+	if DisplayServer.get_name()=="headless": return
+	var camera=Camera3D.new()
+	get_tree().current_scene.add_child(camera)
+	camera.position=player.position+Vector3(3,2.2,-4)
+	camera.look_at(player.position+Vector3.UP)
+	camera.make_current()
+	await frames(3)
+	await capture(filename)
+	player.camera.make_current()
+	camera.queue_free()
+
+func run() -> void:
+	get_tree().current_scene=null
+	SaveService.SAVE_DIR="res://test_logs/extra_mobility_%d/" % Time.get_ticks_usec()
+	SaveService._ensure_save_dir()
+	SessionState.progression_loaded=true
+	get_tree().change_scene_to_file("res://scenes/boot.tscn")
+	await frames(8)
+	get_tree().current_scene._on_single_pressed()
+	await frames(25)
+	var player=get_tree().get_first_node_in_group("players")
+	check(not MOB.purchase("invented") and not MOB.purchase("skateboard"),"unknown and unaffordable mobility purchases rejected")
+	GameState.team_credits=3000
+	check(not MOB.purchase("dirtbike"),"cross bike respects actual land progression")
+	await look(player,Vector3(15,0.08,23.2),Vector3(15,1.2,25))
+	player._select_vehicle(2)
+	await click(player,"Acquista")
+	check(MOB.owned("skateboard") and GameState.team_credits==2650 and not MOB.purchase("skateboard"),"garage purchase debits skateboard once without changing legacy progression")
+	await capture("mobility_skate_catalog")
+	await click(player,"Equipaggia")
+	check(is_instance_valid(player._mounted_vehicle) and player._mounted_vehicle.vehicle_kind=="skateboard" and GameState.vehicle_level==0,"board equips beneath player before buying scooter")
+	hold_test_action("move_forward")
+	await frames(100)
+	check(player._vehicle_speed>2 and player._mounted_vehicle.wheels.size()==4,"skateboard has four wheels and accelerates through pushing")
+	var y: float=player.position.y
+	hold_test_action("jump")
+	await frames(2)
+	var board_impulse: bool=player._vehicle_motion.jump_lock>0.1 and player.velocity.y>2.5
+	print("BOARD_HOP impulse=",board_impulse," lock=",player._vehicle_motion.jump_lock," velocity=",player.velocity)
+	release_test_action("jump")
+	await frames(14)
+	check(board_impulse and player.position.y>y+0.5,"board ollie uses actual jumping body")
+	await vehicle_picture(player,"mobility_skate_ollie")
+	release_test_action("move_forward")
+	await frames(100)
+	check(SaveService.save_checkpoint(86),"board mounted snapshot is valid without owning legacy vehicles")
+	player._do_quit_to_menu()
+	await frames(15)
+	get_tree().current_scene._on_single_pressed()
+	await frames(30)
+	player=get_tree().get_first_node_in_group("players")
+	check(is_instance_valid(player._mounted_vehicle) and player._mounted_vehicle.vehicle_kind=="skateboard","continue restores the selected board rather than replacing it with scooter")
+	player._open_inventory()
+	await frames(4)
+	check(player._pause_menu.find_children("*","Button",true,false).any(func(button):return button.text.begins_with("Skateboard")) and player._pause_menu.size.y<=700,"owned board remains accessible in equipment within 720p height")
+	await capture("mobility_skate_equipment")
+	player._close_pause_menu()
+	player._dismount_vehicle()
+	await frames(24)
+	check(get_tree().get_nodes_in_group("yard_vehicles").filter(func(node):return node.vehicle_kind=="skateboard").all(func(node):return not node.visible and node.body.collision_layer==0),"stowing board removes it physically from world")
+	GameState.yard_level=1
+	var directory: String=SaveService.SAVE_DIR
+	var errors: bool=Engine.print_error_messages
+	SaveService.SAVE_DIR="res://project.godot/"
+	Engine.print_error_messages=false
+	var failed: bool=MOB.purchase("dirtbike")
+	Engine.print_error_messages=errors
+	SaveService.SAVE_DIR=directory
+	check(not failed and not MOB.owned("dirtbike") and GameState.team_credits==2650,"failed bike checkpoint restores money and ownership")
+	await look(player,Vector3(15,0.08,23.2),Vector3(15,1.2,25))
+	player._select_vehicle(3)
+	await click(player,"Acquista")
+	check(MOB.owned("dirtbike") and GameState.team_credits==250,"cross bike purchased with its own price and progression")
+	await capture("mobility_cross_catalog")
+	player._close_pause_menu()
+	var bike=get_tree().get_nodes_in_group("yard_vehicles").filter(func(node):return node.vehicle_kind=="dirtbike")[0]
+	await look(player,bike.global_position+Vector3(1.3,0.08,0.1),bike.global_position+Vector3(0,1.2,0.15))
+	await confirm_placement(player)
+	check(player._mounted_vehicle==bike,"looking at actual bike seat and pressing E mounts cross bike")
+	await frames(30)
+	check(player._vehicle_motion.contacts==2 and bike.wheels.size()==2,"bike suspension samples two real axles")
+	hold_test_action("move_forward")
+	await frames(90)
+	hold_test_action("move_right")
+	await frames(35)
+	check(absf(player._vehicle_speed)>3 and absf(bike.visual.rotation.z)>0.03,"cross bike moves and banks through an actual turn")
+	release_test_action("move_right")
+	release_test_action("move_forward")
+	player.position=Vector3(43,0.08,60)
+	player.velocity=Vector3.ZERO
+	player._vehicle_motion.reset(0,Vector3.ZERO,bike.motion_definition())
+	await frames(30)
+	var bike_y: float=player.position.y
+	hold_test_action("jump")
+	await frames(2)
+	var bike_impulse: bool=player._vehicle_motion.jump_lock>0.1 and player.velocity.y>2.5
+	print("BIKE_HOP impulse=",bike_impulse," lock=",player._vehicle_motion.jump_lock," velocity=",player.velocity)
+	release_test_action("jump")
+	await frames(12)
+	check(bike_impulse and player.position.y>bike_y+0.3,"cross bike hop lifts the actual rider and wheels")
+	await vehicle_picture(player,"mobility_cross_jump")
+	player._vehicle_motion.parking_brake=true
+	await frames(130)
+	player.position=Vector3(43,0.08,60)
+	player.velocity=Vector3.ZERO
+	player._vehicle_motion.reset(0,Vector3.ZERO,bike.motion_definition())
+	player._vehicle_motion.parking_brake=true
+	await frames(35)
+	player._toggle_vehicle_view()
+	check(player._vehicle_third_person,"cross bike supports external camera")
+	await capture("mobility_cross_chase")
+	if DisplayServer.get_name()!="headless":
+		var camera=Camera3D.new()
+		get_tree().current_scene.add_child(camera)
+		camera.position=player.position+Vector3(3,2.2,-4)
+		camera.look_at(player.position+Vector3.UP)
+		camera.make_current()
+		await frames(3)
+		await capture("mobility_cross_model")
+		player.camera.make_current()
+		camera.queue_free()
+	check(SaveService.save_checkpoint(87) and SaveService.load_save(87),"cross ownership pose and camera pass save validation")
+	var at: Vector3=player.position
+	player._do_quit_to_menu()
+	await frames(15)
+	get_tree().current_scene._on_single_pressed()
+	await frames(30)
+	player=get_tree().get_first_node_in_group("players")
+	check(is_instance_valid(player._mounted_vehicle) and player._mounted_vehicle.vehicle_kind=="dirtbike" and player.position.distance_to(at)<0.4 and player._vehicle_third_person,"continue restores actual cross bike at saved location and view")
+	check(get_tree().get_nodes_in_group("yard_vehicles").filter(func(node):return node.vehicle_kind=="dirtbike").size()==1,"scene re-entry cannot duplicate purchased bike")
+	var bad: Dictionary=GameState.serialize().duplicate(true)
+	bad.operations.mobility.owned=["skateboard","skateboard"]
+	check(not SaveService._validate_save_schema(bad),"duplicate mobility ownership rejected on load")
+	check(GameState.ops.record_lap(3,21) and GameState.ops.record_lap(4,32) and GameState.operations.park_records["3"]!=GameState.operations.park_records["4"],"cross and skate park records are separate persistent categories")
+	player._open_pause_menu()
+	await frames(6)
+	print("EXTRA_MOBILITY_RESULT: %d checks, %d failures" % [checks,failures])
+	get_tree().quit(1 if failures else 0)

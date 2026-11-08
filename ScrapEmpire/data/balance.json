@@ -1,0 +1,2400 @@
+{
+  "design_version": "0.1",
+  "status": "single_player_role_tools_playtest",
+  "max_players": 4,
+  "sector_counts": {
+    "metal": 60,
+    "plastic": 40,
+    "electronics": 20
+  },
+  "materials": {
+    "metal": {
+      "mass_kg": 2,
+      "credits": 10,
+      "collect_seconds": 1.5,
+      "tools": [
+        0,
+        2,
+        3
+      ]
+    },
+    "plastic": {
+      "mass_kg": 1,
+      "credits": 4,
+      "collect_seconds": 1,
+      "tools": [
+        0,
+        3
+      ]
+    },
+    "electronics": {
+      "mass_kg": 3,
+      "credits": 24,
+      "collect_seconds": 2.5,
+      "tools": [
+        0,
+        1
+      ]
+    },
+    "copper": {
+      "mass_kg": 3,
+      "credits": 18,
+      "collect_seconds": 2,
+      "tools": [
+        1,
+        4
+      ]
+    },
+    "aluminum": {
+      "mass_kg": 1,
+      "credits": 12,
+      "collect_seconds": 1.5,
+      "tools": [
+        1,
+        2
+      ]
+    },
+    "glass": {
+      "mass_kg": 2,
+      "credits": 8,
+      "collect_seconds": 1.5,
+      "tools": [
+        2
+      ]
+    },
+    "rubber": {
+      "mass_kg": 2,
+      "credits": 10,
+      "collect_seconds": 1.5,
+      "tools": [
+        0,
+        2,
+        3,
+        4
+      ]
+    },
+    "textile": {
+      "mass_kg": 1,
+      "credits": 6,
+      "collect_seconds": 1,
+      "tools": [
+        0
+      ]
+    },
+    "hazardous": {
+      "mass_kg": 5,
+      "credits": 50,
+      "collect_seconds": 3,
+      "tools": [
+        1
+      ]
+    }
+  },
+  "player": {
+    "capacity_kg": 20,
+    "walk_mps": 4.5,
+    "sprint_mps": 7,
+    "interaction_m": 3
+  },
+  "contracts": [
+    {
+      "id": "C01",
+      "deposit_value_min": 300,
+      "clean_count_min": 30,
+      "bonus": 100,
+      "requires": null
+    },
+    {
+      "id": "C02",
+      "deposit_value_min": 700,
+      "clean_count_min": 72,
+      "bonus": 200,
+      "requires": "C01"
+    },
+    {
+      "id": "C03",
+      "deposit_value_min": 1000,
+      "clean_count_min": 108,
+      "bonus": 300,
+      "requires": "C02"
+    }
+  ],
+  "upgrades": {
+    "bag": [
+      {
+        "level": 1,
+        "cost": 250,
+        "capacity_kg": 30
+      },
+      {
+        "level": 2,
+        "cost": 600,
+        "capacity_kg": 40
+      },
+      {
+        "level": 3,
+        "cost": 1200,
+        "capacity_kg": 55
+      },
+      {
+        "level": 4,
+        "cost": 2200,
+        "capacity_kg": 70
+      },
+      {
+        "level": 5,
+        "cost": 3800,
+        "capacity_kg": 90
+      },
+      {
+        "level": 6,
+        "cost": 6200,
+        "capacity_kg": 110
+      }
+    ],
+    "tool": [
+      {
+        "level": 1,
+        "cost": 350,
+        "time_multiplier": 0.8
+      },
+      {
+        "level": 2,
+        "cost": 800,
+        "time_multiplier": 0.65
+      }
+    ],
+    "movement": [
+      {
+        "level": 1,
+        "cost": 300,
+        "speed_multiplier": 1.1
+      },
+      {
+        "level": 2,
+        "cost": 700,
+        "speed_multiplier": 1.2
+      }
+    ]
+  },
+  "vehicles": [
+    {
+      "level": 1,
+      "name": "Monopattino da recupero",
+      "cost": 600,
+      "speed_mps": 11,
+      "requires_land": 0,
+      "acceleration": 5.5,
+      "braking": 15,
+      "coast_drag": 1.7,
+      "steering": 2.3,
+      "suspension_response": 9,
+      "jump_velocity": 5.5
+    },
+    {
+      "level": 2,
+      "name": "Utility buggy",
+      "cost": 1800,
+      "speed_mps": 16,
+      "requires_land": 1,
+      "acceleration": 6,
+      "braking": 18,
+      "coast_drag": 1.4,
+      "steering": 1.8,
+      "suspension_response": 6,
+      "jump_velocity": 0
+    }
+  ],
+  "salvage_objects": {
+    "pile": {
+      "name": "Cumulo di recupero",
+      "steps": [
+        {
+          "name": "Fruga fra le macerie",
+          "seconds": 3.8,
+          "yield": {
+            "metal": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 0
+        },
+        {
+          "name": "Libera lo strato intermedio",
+          "seconds": 4.9,
+          "yield": {
+            "metal": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 0
+        },
+        {
+          "name": "Estrai il recupero profondo",
+          "seconds": 6.1,
+          "yield": {
+            "metal": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 0
+        }
+      ]
+    },
+    "car": {
+      "name": "Automobile abbandonata",
+      "steps": [
+        {
+          "name": "Rimuovi pannelli",
+          "seconds": 4,
+          "yield": {
+            "metal": 3
+          },
+          "land": 0,
+          "tool": 1,
+          "component_name": "Carrozzeria",
+          "requires": [],
+          "part": "panel",
+          "anchor": [
+            0,
+            0.98,
+            -1.25
+          ],
+          "hitbox": [
+            1.85,
+            0.34,
+            1.1
+          ]
+        },
+        {
+          "name": "Recupera abitacolo",
+          "seconds": 5,
+          "yield": {
+            "plastic": 2,
+            "electronics": 1
+          },
+          "land": 0,
+          "tool": 1,
+          "component_name": "Ruote e abitacolo",
+          "requires": [],
+          "part": "wheel",
+          "anchor": [
+            0,
+            1.2,
+            0.1
+          ],
+          "hitbox": [
+            1.7,
+            0.85,
+            1.55
+          ]
+        },
+        {
+          "name": "Estrai motore e cablaggi",
+          "seconds": 7,
+          "yield": {
+            "metal": 2,
+            "copper": 1
+          },
+          "land": 1,
+          "tool": 1,
+          "component_name": "Motore e cablaggi",
+          "requires": [
+            0
+          ],
+          "part": "engine",
+          "anchor": [
+            0,
+            0.78,
+            -1.25
+          ],
+          "hitbox": [
+            1.05,
+            0.5,
+            0.9
+          ]
+        },
+        {
+          "name": "Taglia il telaio",
+          "seconds": 6,
+          "yield": {
+            "metal": 4
+          },
+          "land": 1,
+          "tool": 2,
+          "component_name": "Telaio",
+          "requires": [
+            0,
+            1,
+            2
+          ],
+          "part": "frame",
+          "anchor": [
+            0,
+            0.4,
+            0
+          ],
+          "hitbox": [
+            2.05,
+            0.65,
+            3.8
+          ]
+        }
+      ]
+    },
+    "generator": {
+      "name": "Generatore dismesso",
+      "steps": [
+        {
+          "name": "Apri il quadro",
+          "seconds": 3.5,
+          "yield": {
+            "electronics": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 1,
+          "component_name": "Quadro e batteria",
+          "requires": [],
+          "part": "battery",
+          "anchor": [
+            0,
+            0.88,
+            0
+          ],
+          "hitbox": [
+            1.52,
+            1.52,
+            1.22
+          ]
+        },
+        {
+          "name": "Smonta alternatore",
+          "seconds": 6,
+          "yield": {
+            "copper": 2,
+            "metal": 1
+          },
+          "land": 1,
+          "tool": 1,
+          "component_name": "Alternatore",
+          "requires": [
+            0
+          ],
+          "part": "engine",
+          "anchor": [
+            0,
+            0.8,
+            0
+          ],
+          "hitbox": [
+            0.9,
+            0.9,
+            1.05
+          ]
+        },
+        {
+          "name": "Recupera il basamento",
+          "seconds": 4,
+          "yield": {
+            "metal": 3
+          },
+          "land": 1,
+          "tool": 2,
+          "component_name": "Basamento",
+          "requires": [
+            0,
+            1
+          ],
+          "part": "frame",
+          "anchor": [
+            0,
+            0.15,
+            0
+          ],
+          "hitbox": [
+            1.6,
+            0.3,
+            1.4
+          ]
+        }
+      ]
+    },
+    "appliance": {
+      "name": "Lavatrice industriale",
+      "steps": [
+        {
+          "name": "Rimuovi il rivestimento",
+          "seconds": 3,
+          "yield": {
+            "metal": 2,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 2,
+          "component_name": "Rivestimento",
+          "requires": [],
+          "part": "panel",
+          "anchor": [
+            0,
+            0.85,
+            0
+          ],
+          "hitbox": [
+            1.42,
+            1.72,
+            1.12
+          ]
+        },
+        {
+          "name": "Recupera scheda e motore",
+          "seconds": 4.5,
+          "yield": {
+            "electronics": 1,
+            "metal": 1
+          },
+          "land": 0,
+          "tool": 1,
+          "component_name": "Motore e scheda",
+          "requires": [
+            0
+          ],
+          "part": "engine",
+          "anchor": [
+            0.48,
+            0.4,
+            0
+          ],
+          "hitbox": [
+            0.5,
+            0.5,
+            0.8
+          ]
+        },
+        {
+          "name": "Estrai il cestello",
+          "seconds": 4,
+          "yield": {
+            "metal": 2
+          },
+          "land": 0,
+          "tool": 2,
+          "component_name": "Cestello",
+          "requires": [
+            0,
+            1
+          ],
+          "part": "panel",
+          "anchor": [
+            0,
+            0.9,
+            0
+          ],
+          "hitbox": [
+            1.1,
+            0.8,
+            1.1
+          ]
+        }
+      ]
+    },
+    "pile_plastic": {
+      "name": "Cumulo di plastiche",
+      "steps": [
+        {
+          "name": "Separa il recupero",
+          "seconds": 2.8,
+          "yield": {
+            "plastic": 3
+          },
+          "land": 0,
+          "tool": 0
+        },
+        {
+          "name": "Libera lo strato intermedio",
+          "seconds": 3.6,
+          "yield": {
+            "plastic": 3
+          },
+          "land": 0,
+          "tool": 0
+        },
+        {
+          "name": "Estrai il recupero profondo",
+          "seconds": 4.5,
+          "yield": {
+            "plastic": 3
+          },
+          "land": 0,
+          "tool": 0
+        }
+      ]
+    },
+    "pile_electronics": {
+      "name": "Cumulo elettrico",
+      "steps": [
+        {
+          "name": "Separa il recupero",
+          "seconds": 4.5,
+          "yield": {
+            "electronics": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 1
+        },
+        {
+          "name": "Libera lo strato intermedio",
+          "seconds": 5.9,
+          "yield": {
+            "electronics": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 1
+        },
+        {
+          "name": "Estrai il recupero profondo",
+          "seconds": 7.2,
+          "yield": {
+            "electronics": 1,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 1
+        }
+      ]
+    },
+    "pile_rubble": {
+      "name": "Cumulo di macerie",
+      "steps": [
+        {
+          "name": "Separa il recupero",
+          "seconds": 4.2,
+          "yield": {
+            "metal": 2,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 2
+        },
+        {
+          "name": "Libera lo strato intermedio",
+          "seconds": 5.5,
+          "yield": {
+            "metal": 2,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 2
+        },
+        {
+          "name": "Estrai il recupero profondo",
+          "seconds": 6.7,
+          "yield": {
+            "metal": 2,
+            "plastic": 1
+          },
+          "land": 0,
+          "tool": 2
+        }
+      ]
+    },
+    "pile_metal": {
+      "name": "Cumulo di ferro",
+      "steps": [
+        {
+          "name": "Separa il recupero",
+          "seconds": 4,
+          "yield": {
+            "metal": 3
+          },
+          "land": 0,
+          "tool": 2
+        },
+        {
+          "name": "Libera lo strato intermedio",
+          "seconds": 5.2,
+          "yield": {
+            "metal": 3
+          },
+          "land": 0,
+          "tool": 2
+        },
+        {
+          "name": "Estrai il recupero profondo",
+          "seconds": 6.4,
+          "yield": {
+            "metal": 3
+          },
+          "land": 0,
+          "tool": 2
+        }
+      ]
+    },
+    "sealed_crate": {
+      "name": "Cassa industriale sigillata",
+      "steps": [
+        {
+          "name": "Fai leva sul coperchio",
+          "component_name": "Coperchio bloccato",
+          "seconds": 4,
+          "tool": 3,
+          "land": 0,
+          "requires": [],
+          "part": "panel",
+          "anchor": [
+            0,
+            1.25,
+            0
+          ],
+          "hitbox": [
+            1.8,
+            0.25,
+            1.5
+          ],
+          "yield": {
+            "metal": 4,
+            "plastic": 2
+          }
+        },
+        {
+          "name": "Taglia le fascette",
+          "component_name": "Fascette e cablaggi",
+          "seconds": 3,
+          "tool": 4,
+          "land": 0,
+          "requires": [
+            0
+          ],
+          "part": "battery",
+          "anchor": [
+            0,
+            0.85,
+            0
+          ],
+          "hitbox": [
+            1.2,
+            0.5,
+            1.1
+          ],
+          "yield": {
+            "copper": 3,
+            "rubber": 2
+          }
+        },
+        {
+          "name": "Recupera il quadro",
+          "component_name": "Quadro elettronico",
+          "seconds": 5,
+          "tool": 1,
+          "land": 0,
+          "requires": [
+            1
+          ],
+          "part": "engine",
+          "anchor": [
+            0,
+            0.35,
+            0
+          ],
+          "hitbox": [
+            1.8,
+            0.5,
+            1.5
+          ],
+          "yield": {
+            "electronics": 3,
+            "metal": 2
+          }
+        }
+      ]
+    },
+    "aircraft_turbine": {
+      "name": "Turbina del Volo 76",
+      "steps": [
+        {
+          "name": "Apri la carenatura",
+          "component_name": "Apri la carenatura",
+          "tool": 3,
+          "seconds": 5,
+          "part": "panel",
+          "anchor": [
+            0,
+            1,
+            0
+          ],
+          "hitbox": [
+            1.85,
+            1.6,
+            2.3
+          ],
+          "yield": {
+            "aluminum": 3,
+            "metal": 2
+          },
+          "requires": [],
+          "land": 0
+        },
+        {
+          "name": "Separa le linee di alimentazione",
+          "component_name": "Separa le linee di alimentazione",
+          "tool": 4,
+          "seconds": 4,
+          "part": "battery",
+          "anchor": [
+            0,
+            0.8,
+            -0.7
+          ],
+          "hitbox": [
+            1.2,
+            0.5,
+            0.7
+          ],
+          "yield": {
+            "copper": 3,
+            "rubber": 2
+          },
+          "requires": [
+            0
+          ],
+          "land": 0
+        },
+        {
+          "name": "Estrai il rotore",
+          "component_name": "Estrai il rotore",
+          "tool": 1,
+          "seconds": 8,
+          "part": "engine",
+          "anchor": [
+            0,
+            0.85,
+            0
+          ],
+          "hitbox": [
+            1.3,
+            1.3,
+            1.5
+          ],
+          "yield": {
+            "aluminum": 3,
+            "metal": 3
+          },
+          "requires": [
+            1
+          ],
+          "land": 0
+        }
+      ]
+    },
+    "survey_rig": {
+      "name": "Sonda del vecchio rilevatore",
+      "steps": [
+        {
+          "name": "Libera il guscio incastrato",
+          "component_name": "Libera il guscio incastrato",
+          "tool": 2,
+          "seconds": 5,
+          "part": "panel",
+          "anchor": [
+            0,
+            0.7,
+            0
+          ],
+          "hitbox": [
+            1.7,
+            1.3,
+            1.5
+          ],
+          "yield": {
+            "metal": 3,
+            "glass": 2
+          },
+          "requires": [],
+          "land": 0
+        },
+        {
+          "name": "Scollega la batteria",
+          "component_name": "Scollega la batteria",
+          "tool": 4,
+          "seconds": 4,
+          "part": "battery",
+          "anchor": [
+            -0.35,
+            0.55,
+            0
+          ],
+          "hitbox": [
+            0.6,
+            0.7,
+            1
+          ],
+          "yield": {
+            "copper": 2,
+            "rubber": 1
+          },
+          "requires": [
+            0
+          ],
+          "land": 0
+        },
+        {
+          "name": "Recupera la strumentazione",
+          "component_name": "Recupera la strumentazione",
+          "tool": 1,
+          "seconds": 6,
+          "part": "engine",
+          "anchor": [
+            0.35,
+            0.6,
+            0
+          ],
+          "hitbox": [
+            0.75,
+            0.8,
+            1
+          ],
+          "yield": {
+            "electronics": 3,
+            "glass": 2
+          },
+          "requires": [
+            1
+          ],
+          "land": 0
+        }
+      ]
+    },
+    "signal_receiver": {
+      "name": "Ricevitore del Segnale 09",
+      "steps": [
+        {
+          "name": "Sgancia lo scudo",
+          "component_name": "Sgancia lo scudo",
+          "tool": 3,
+          "seconds": 5,
+          "part": "panel",
+          "anchor": [
+            0,
+            1.25,
+            0
+          ],
+          "hitbox": [
+            1.8,
+            0.5,
+            1.7
+          ],
+          "yield": {
+            "aluminum": 3,
+            "glass": 2
+          },
+          "requires": [],
+          "land": 0
+        },
+        {
+          "name": "Isola la bobina",
+          "component_name": "Isola la bobina",
+          "tool": 4,
+          "seconds": 5,
+          "part": "battery",
+          "anchor": [
+            0,
+            0.7,
+            0
+          ],
+          "hitbox": [
+            1.2,
+            0.7,
+            1.2
+          ],
+          "yield": {
+            "copper": 3,
+            "electronics": 1
+          },
+          "requires": [
+            0
+          ],
+          "land": 0
+        },
+        {
+          "name": "Smonta il nucleo",
+          "component_name": "Smonta il nucleo",
+          "tool": 1,
+          "seconds": 7,
+          "part": "engine",
+          "anchor": [
+            0,
+            0.25,
+            0
+          ],
+          "hitbox": [
+            1.5,
+            0.4,
+            1.5
+          ],
+          "yield": {
+            "electronics": 3,
+            "metal": 2
+          },
+          "requires": [
+            1
+          ],
+          "land": 0
+        }
+      ]
+    }
+  },
+  "land_expansions": [
+    {
+      "level": 1,
+      "cost": 750,
+      "name": "Lotto Est · officina di recupero",
+      "materials": {
+        "copper": 12,
+        "aluminum": 12
+      },
+      "requires_tool": 1,
+      "project_materials": {
+        "electronics": 4
+      }
+    },
+    {
+      "level": 2,
+      "cost": 1500,
+      "name": "Lotto delle dune · logistica e produzione",
+      "materials": {
+        "glass": 12,
+        "rubber": 12
+      },
+      "requires_tool": 2,
+      "project_materials": {
+        "copper": 6,
+        "aluminum": 6
+      }
+    }
+  ],
+  "machines": {
+    "press": {
+      "cost": 400,
+      "input_material": "metal",
+      "input_units": 5,
+      "cycle_seconds": 6,
+      "value_multiplier": 1.5
+    }
+  },
+  "network_proposal": {
+    "udp_port": 24567,
+    "physics_hz": 60,
+    "input_hz": 20,
+    "snapshot_hz": 10,
+    "interpolation_ms": 100,
+    "stale_input_ms": 250,
+    "lease_seconds": 3,
+    "protocol_version": 1
+  },
+  "secrets": [
+    {
+      "id": "rusty_duck",
+      "name": "Operazione Anatra",
+      "description": "Una mascotte dorata custodisce il deposito dimenticato.",
+      "hint": "A nord-ovest, cerca un vecchio accampamento fra le dune.",
+      "reward": 150
+    },
+    {
+      "id": "signal_42",
+      "name": "Frequenza 42",
+      "description": "La risposta era nascosta fra antenne e bulloni.",
+      "hint": "A est dei lotti, una parabola continua a guardare il cielo.",
+      "reward": 200
+    },
+    {
+      "id": "nut_king",
+      "name": "Il Re dei Bulloni",
+      "description": "Ogni impero comincia da un piccolo dado. Questo non è piccolo.",
+      "hint": "A sud, una sagoma metallica spunta dalla sabbia.",
+      "reward": 300
+    }
+  ],
+  "tools": [
+    {
+      "id": "hands",
+      "name": "Mani",
+      "key": 1,
+      "role": "Raccolta libera e ricerca nei cumuli",
+      "multipliers": {}
+    },
+    {
+      "id": "screwdriver",
+      "name": "Cacciavite",
+      "key": 2,
+      "role": "Schede, cablaggi e recupero di precisione",
+      "multipliers": {
+        "electronics": 0.6,
+        "copper": 0.75,
+        "aluminum": 0.85
+      }
+    },
+    {
+      "id": "hammer",
+      "name": "Martello",
+      "key": 3,
+      "role": "Vetro, metalli e demolizione dei telai",
+      "multipliers": {
+        "metal": 0.55,
+        "glass": 0.8,
+        "rubber": 0.8,
+        "aluminum": 1
+      }
+    },
+    {
+      "id": "crowbar",
+      "name": "Piede di porco",
+      "key": 5,
+      "role": "Apri casse sigillate e separa pannelli senza distruggerli",
+      "multipliers": {
+        "metal": 0.85,
+        "plastic": 0.8,
+        "rubber": 0.65
+      }
+    },
+    {
+      "id": "bolt_cutters",
+      "name": "Cesoie",
+      "key": 6,
+      "role": "Taglia fascette e cavi; recupera rame e gomma",
+      "multipliers": {
+        "copper": 0.55,
+        "rubber": 0.6
+      }
+    }
+  ],
+  "orders": [
+    {
+      "id": "yard_restart",
+      "name": "Rimettiamo in moto il deposito",
+      "description": "Ricambi per ripristinare i servizi della base.",
+      "materials": {
+        "metal": 8,
+        "plastic": 6,
+        "electronics": 2
+      },
+      "bales": 0,
+      "reward": 300
+    },
+    {
+      "id": "precision_supply",
+      "name": "Cablaggi per la nuova officina",
+      "description": "Recupera componenti di precisione dal Lotto Est.",
+      "materials": {
+        "copper": 4,
+        "aluminum": 4,
+        "electronics": 3
+      },
+      "bales": 0,
+      "reward": 650
+    },
+    {
+      "id": "industrial_delivery",
+      "name": "Primo carico industriale",
+      "description": "Completa una fornitura dal Lotto delle dune e avvia la pressa.",
+      "materials": {
+        "glass": 6,
+        "rubber": 6,
+        "metal": 8
+      },
+      "bales": 1,
+      "reward": 1100
+    },
+    {
+      "id": "fleet_service",
+      "name": "Una flotta per il recupero",
+      "description": "Rifornisci l’officina, acquista il buggy e prepara i trasporti del centro.",
+      "materials": {
+        "metal": 12,
+        "copper": 6,
+        "rubber": 6
+      },
+      "bales": 2,
+      "reward": 1500,
+      "requires_land": 2,
+      "requires_vehicle": 2
+    },
+    {
+      "id": "certified_yard",
+      "name": "Centro di recupero certificato",
+      "description": "Ultima fornitura: completa i due lotti e consegna il primo grande carico selezionato.",
+      "materials": {
+        "plastic": 12,
+        "electronics": 6,
+        "aluminum": 10,
+        "glass": 8
+      },
+      "bales": 4,
+      "reward": 2500,
+      "requires_land": 2,
+      "requires_vehicle": 2
+    }
+  ],
+  "workshop_modules": {
+    "motor": {
+      "name": "Trasmissione",
+      "icon": "motor",
+      "description": "Velocità e ripresa di entrambi i mezzi",
+      "requires": "vehicle",
+      "levels": [
+        {
+          "cost": 450,
+          "effect": 1.15,
+          "orders": 1
+        },
+        {
+          "cost": 1000,
+          "effect": 1.3,
+          "orders": 3
+        },
+        {
+          "cost": 2000,
+          "effect": 1.45,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 3500,
+          "effect": 1.6,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "suspension": {
+      "name": "Sospensioni da dune",
+      "icon": "suspension",
+      "description": "Assetto più reattivo e sterzo più preciso",
+      "requires": "vehicle",
+      "levels": [
+        {
+          "cost": 350,
+          "effect": 1.15,
+          "orders": 1
+        },
+        {
+          "cost": 850,
+          "effect": 1.3,
+          "orders": 3
+        },
+        {
+          "cost": 1700,
+          "effect": 1.45,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 2975,
+          "effect": 1.6,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "workbench": {
+      "name": "Banco di precisione",
+      "icon": "workbench",
+      "description": "Ripara componenti nel Lotto Est e smonta più rapidamente",
+      "requires": "tool",
+      "levels": [
+        {
+          "cost": 400,
+          "effect": 0.85,
+          "orders": 1
+        },
+        {
+          "cost": 950,
+          "effect": 0.7,
+          "orders": 3
+        },
+        {
+          "cost": 1900,
+          "effect": 0.6,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 3325,
+          "effect": 0.5,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "press_drive": {
+      "name": "Idraulica della pressa",
+      "icon": "press",
+      "description": "Cicli più rapidi; livello 2 abilita tramoggia nel Lotto dune",
+      "requires": "press",
+      "levels": [
+        {
+          "cost": 500,
+          "effect": 0.75,
+          "orders": 1
+        },
+        {
+          "cost": 1100,
+          "effect": 0.5,
+          "orders": 3
+        },
+        {
+          "cost": 2200,
+          "effect": 0.42,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 3850,
+          "effect": 0.35,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "cargo_rack": {
+      "name": "Cassone modulare",
+      "icon": "motor",
+      "description": "Più carico e componenti ingombranti sul buggy",
+      "requires": "buggy",
+      "levels": [
+        {
+          "cost": 700,
+          "effect": 200,
+          "orders": 1
+        },
+        {
+          "cost": 1500,
+          "effect": 300,
+          "orders": 3
+        },
+        {
+          "cost": 3000,
+          "effect": 400,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 5250,
+          "effect": 500,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ],
+      "unit": "kg"
+    },
+    "gloves": {
+      "name": "Guanti da selezione",
+      "icon": "gloves",
+      "description": "Riduce i tempi dei rottami singoli; serve sempre l'attrezzo corretto",
+      "requires": "tool",
+      "unit": "",
+      "levels": [
+        {
+          "effect": 0.8,
+          "cost": 300,
+          "orders": 1
+        },
+        {
+          "effect": 0.65,
+          "cost": 800,
+          "orders": 3
+        },
+        {
+          "cost": 1600,
+          "effect": 0.5,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 2800,
+          "effect": 0.4,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "harness": {
+      "name": "Imbracatura da recupero",
+      "icon": "harness",
+      "description": "Trascinamento e cammino durante il traino più rapidi",
+      "requires": "tool",
+      "unit": "multiplier",
+      "levels": [
+        {
+          "effect": 1.5,
+          "cost": 450,
+          "orders": 1
+        },
+        {
+          "effect": 2,
+          "cost": 1100,
+          "orders": 3
+        },
+        {
+          "cost": 2200,
+          "effect": 2.4,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 3850,
+          "effect": 2.8,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "scanner": {
+      "name": "Scanner da recupero",
+      "icon": "scanner",
+      "description": "F cerca componenti per la fornitura attiva; Maiusc+F cerca voci mancanti nel libro",
+      "requires": "tool",
+      "unit": "m",
+      "levels": [
+        {
+          "effect": 25,
+          "cost": 650,
+          "orders": 1
+        },
+        {
+          "effect": 55,
+          "cost": 1400,
+          "orders": 3
+        },
+        {
+          "cost": 2800,
+          "effect": 80,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 4900,
+          "effect": 110,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "headlamp": {
+      "name": "Lampada da lavoro",
+      "icon": "headlamp",
+      "description": "Illumina davanti a te; L o inventario per accendere e spegnere",
+      "requires": "tool",
+      "unit": "m",
+      "levels": [
+        {
+          "effect": 12,
+          "cost": 250,
+          "orders": 0
+        },
+        {
+          "effect": 22,
+          "cost": 650,
+          "orders": 1
+        },
+        {
+          "cost": 1300,
+          "effect": 30,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 2275,
+          "effect": 38,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "brakes": {
+      "name": "Freni rinforzati",
+      "icon": "brakes",
+      "description": "Frenata del buggy più potente; utile con cassone carico e in discesa",
+      "requires": "buggy",
+      "unit": "braking",
+      "levels": [
+        {
+          "cost": 500,
+          "effect": 1.25,
+          "orders": 1
+        },
+        {
+          "cost": 1200,
+          "effect": 1.55,
+          "orders": 3
+        },
+        {
+          "cost": 2400,
+          "effect": 1.8,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 4200,
+          "effect": 2.0,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "tyres": {
+      "name": "Pneumatici da dune",
+      "icon": "tyres",
+      "description": "Più aderenza laterale del buggy e recupero più rapido dopo una sbandata",
+      "requires": "buggy",
+      "unit": "grip",
+      "levels": [
+        {
+          "cost": 400,
+          "effect": 1.2,
+          "orders": 1
+        },
+        {
+          "cost": 950,
+          "effect": 1.45,
+          "orders": 3
+        },
+        {
+          "cost": 1900,
+          "effect": 1.6,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 3325,
+          "effect": 1.75,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    },
+    "assembly": {
+      "name": "Dime di assemblaggio",
+      "icon": "workbench",
+      "description": "Prodotti complessi più rapidi; livello 2 estende la coda da 3 a 6 lavori",
+      "requires": "tool",
+      "levels": [
+        {
+          "cost": 650,
+          "effect": 0.8,
+          "orders": 2
+        },
+        {
+          "cost": 1400,
+          "effect": 0.6,
+          "orders": 4
+        },
+        {
+          "cost": 2800,
+          "effect": 0.5,
+          "orders": 5,
+          "deliveries": 2
+        },
+        {
+          "cost": 4900,
+          "effect": 0.45,
+          "orders": 5,
+          "deliveries": 5
+        }
+      ]
+    }
+  },
+  "logistics": {
+    "cargo_capacity_kg": 120,
+    "max_press_queue": 20,
+    "carry_walk_mps": 2.4,
+    "repair_materials": {
+      "metal": 2,
+      "electronics": 1
+    },
+    "damaged_value_multiplier": 0.45,
+    "day_seconds": 1200,
+    "drag_speed_mps": 1.8,
+    "buggy_headlight_range_m": 26,
+    "drag_mass_scale_kg": 30,
+    "drag_acceleration": 6,
+    "drag_assembly_mass_kg": {
+      "car": 400,
+      "generator": 120,
+      "appliance": 55
+    },
+    "pile_reveals": [
+      {
+        "kind": "panel",
+        "quality": 0
+      },
+      {
+        "kind": "wheel",
+        "quality": 0
+      },
+      {
+        "kind": "battery",
+        "quality": 1
+      }
+    ],
+    "drag_material_friction": {
+      "metal": 1,
+      "plastic": 0.75,
+      "electronics": 0.95,
+      "rubber": 1.3,
+      "copper": 1,
+      "aluminum": 0.85,
+      "glass": 0.8
+    },
+    "pile_reveals_by_definition": {
+      "pile_plastic": [
+        {
+          "kind": "panel",
+          "quality": 0
+        },
+        {
+          "kind": "panel",
+          "quality": 0
+        },
+        {
+          "kind": "wheel",
+          "quality": 1
+        }
+      ],
+      "pile_electronics": [
+        {
+          "kind": "battery",
+          "quality": 0
+        },
+        {
+          "kind": "engine",
+          "quality": 0
+        },
+        {
+          "kind": "battery",
+          "quality": 1
+        }
+      ],
+      "pile_rubble": [
+        {
+          "kind": "panel",
+          "quality": 0
+        },
+        {
+          "kind": "frame",
+          "quality": 0
+        },
+        {
+          "kind": "engine",
+          "quality": 0
+        }
+      ],
+      "pile_metal": [
+        {
+          "kind": "panel",
+          "quality": 0
+        },
+        {
+          "kind": "engine",
+          "quality": 0
+        },
+        {
+          "kind": "frame",
+          "quality": 1
+        }
+      ]
+    },
+    "specific_orders": [
+      {
+        "id": "radio_lab",
+        "name": "Ricambi per il laboratorio",
+        "orders": 1,
+        "land": 0,
+        "items": {
+          "2_0": 1,
+          "2_3": 1,
+          "2_4": 1
+        },
+        "reward": 450
+      },
+      {
+        "id": "workshop_parts",
+        "name": "Restauro dell'officina",
+        "orders": 2,
+        "land": 0,
+        "items": {
+          "0_0": 2,
+          "0_1": 1,
+          "0_4": 1
+        },
+        "reward": 420
+      },
+      {
+        "id": "optical_recovery",
+        "name": "Recupero ottico",
+        "orders": 3,
+        "land": 2,
+        "items": {
+          "5_2": 1,
+          "5_3": 1,
+          "4_4": 1
+        },
+        "reward": 650
+      }
+    ],
+    "crafting": {
+      "repair_kit": {
+        "name": "Kit di riparazione",
+        "description": "Ripara un componente danneggiato del magazzino, dal banco del garage.",
+        "orders": 0,
+        "tool": 1,
+        "limit": 20,
+        "materials": {
+          "metal": 2,
+          "plastic": 1,
+          "electronics": 1
+        },
+        "parts": {}
+      },
+      "work_lamp": {
+        "name": "Faro da campo",
+        "description": "Treppiede portatile con luce reale a 20 m. Posizionalo dal kit costruito e recuperalo con E.",
+        "orders": 1,
+        "tool": 1,
+        "limit": 3,
+        "materials": {
+          "metal": 3,
+          "plastic": 2,
+          "electronics": 2
+        },
+        "parts": {},
+        "range": 20
+      },
+      "handcart": {
+        "name": "Carrello da recupero",
+        "description": "Trasporta 60 kg di materiali. Carica, traina a piedi e scarica vicino a un deposito.",
+        "orders": 0,
+        "tool": 1,
+        "limit": 1,
+        "materials": {
+          "metal": 6,
+          "plastic": 3
+        },
+        "parts": {
+          "wheel": 2
+        },
+        "capacity_kg": 60,
+        "tow_speed_mps": 3
+      },
+      "desk_lamp": {
+        "name": "Lampada da tavolo",
+        "description": "Prodotto per Marta al banco clienti accanto al garage. Trasforma rottami comuni in un oggetto finito.",
+        "orders": 1,
+        "tool": 1,
+        "limit": 20,
+        "materials": {
+          "metal": 2,
+          "plastic": 1,
+          "electronics": 1
+        },
+        "parts": {}
+      },
+      "toolbox": {
+        "name": "Cassetta portattrezzi",
+        "description": "Prodotto per Enzo al banco clienti. Conserva le scorte necessarie prima di venderle alla bilancia.",
+        "orders": 2,
+        "tool": 1,
+        "limit": 20,
+        "materials": {
+          "metal": 3,
+          "plastic": 2
+        },
+        "parts": {}
+      },
+      "restored_radio": {
+        "name": "Radio restaurata",
+        "description": "Una batteria funzionante e circuiti selezionati tornano a suonare. Nina la rivende nella bottega del quartiere.",
+        "orders": 2,
+        "tool": 1,
+        "land": 1,
+        "module": "workbench",
+        "module_level": 1,
+        "limit": 12,
+        "seconds": 28,
+        "materials": {
+          "metal": 2,
+          "plastic": 2,
+          "electronics": 2,
+          "copper": 1
+        },
+        "parts": {
+          "battery": 1
+        },
+        "customer": "nina"
+      },
+      "bench_compressor": {
+        "name": "Compressore da banco",
+        "description": "Un motore recuperato diventa una macchina utile al cantiere. Bruno cerca prodotti robusti, non rottami sfusi.",
+        "orders": 3,
+        "tool": 2,
+        "land": 1,
+        "module": "workbench",
+        "module_level": 1,
+        "limit": 8,
+        "seconds": 45,
+        "materials": {
+          "metal": 4,
+          "aluminum": 2,
+          "rubber": 1
+        },
+        "parts": {
+          "engine": 1
+        },
+        "customer": "bruno"
+      },
+      "garden_bench": {
+        "name": "Panca da giardino",
+        "description": "Pannelli recuperati, listelli plastici e piedini in gomma per le aree comuni di Riva Secca.",
+        "orders": 3,
+        "tool": 2,
+        "land": 2,
+        "module": "workbench",
+        "module_level": 1,
+        "limit": 10,
+        "seconds": 35,
+        "materials": {
+          "metal": 6,
+          "plastic": 3,
+          "rubber": 2
+        },
+        "parts": {
+          "panel": 1
+        },
+        "customer": "ada"
+      },
+      "crowbar": {
+        "name": "Piede di porco",
+        "description": "Apri coperchi bloccati e recupera i pannelli delle casse sigillate. Tasto5.",
+        "materials": {
+          "metal": 8,
+          "rubber": 2
+        },
+        "parts": {},
+        "orders": 1,
+        "tool": 1,
+        "limit": 1
+      },
+      "bolt_cutters": {
+        "name": "Cesoie",
+        "description": "Taglia le fascette delle casse e separa rame e pneumatici. Tasto6.",
+        "materials": {
+          "metal": 10,
+          "plastic": 2,
+          "copper": 2
+        },
+        "parts": {},
+        "orders": 2,
+        "tool": 2,
+        "limit": 1
+      },
+      "suspension_kit": {
+        "name": "Kit sospensioni",
+        "description": "Costruisci molle e tiranti, poi installa il prossimo livello senza spendere Bulloni.",
+        "materials": {
+          "metal": 14,
+          "rubber": 6
+        },
+        "parts": {
+          "wheel": 1
+        },
+        "orders": 1,
+        "tool": 1,
+        "limit": 4,
+        "install": {
+          "module": "suspension"
+        }
+      },
+      "cargo_kit": {
+        "name": "Sponde rinforzate",
+        "description": "Usa pannelli recuperati per ampliare il cassone del buggy.",
+        "materials": {
+          "metal": 18,
+          "plastic": 6
+        },
+        "parts": {
+          "panel": 2
+        },
+        "orders": 2,
+        "tool": 1,
+        "limit": 4,
+        "install": {
+          "module": "cargo_rack"
+        }
+      },
+      "press_kit": {
+        "name": "Kit idraulico",
+        "description": "Ricostruisci il gruppo della pressa con un motore recuperato.",
+        "materials": {
+          "metal": 18,
+          "copper": 5
+        },
+        "parts": {
+          "engine": 1
+        },
+        "orders": 2,
+        "tool": 1,
+        "limit": 4,
+        "install": {
+          "module": "press_drive"
+        }
+      },
+      "bag_frame": {
+        "name": "Telaio da trasporto",
+        "description": "Cuci e rinforza la sacca: installa il prossimo livello senza spendere Bulloni.",
+        "materials": {
+          "metal": 10,
+          "plastic": 12,
+          "rubber": 4
+        },
+        "parts": {},
+        "orders": 1,
+        "tool": 1,
+        "limit": 4,
+        "install": {
+          "upgrade": "bag"
+        }
+      },
+      "field_depot": {
+        "name": "Deposito da campo",
+        "description": "Costruisci una cassa di scarico, posizionala nelle dune e deposita senza tornare alla base. Il materiale va al magazzino centrale; non vende.",
+        "materials": {
+          "metal": 20,
+          "plastic": 6
+        },
+        "parts": {
+          "panel": 2
+        },
+        "orders": 2,
+        "tool": 1,
+        "limit": 2
+      },
+      "yard_wall": {
+        "name": "Parete di recupero",
+        "description": "Pannello modulare di 3 m. Crea recinti e separa le tue aree di lavoro. Riponibile con E.",
+        "orders": 0,
+        "tool": 1,
+        "limit": 12,
+        "materials": {
+          "metal": 4,
+          "plastic": 2
+        },
+        "parts": {}
+      },
+      "yard_canopy": {
+        "name": "Tettoia illuminata",
+        "description": "Riparo attraversabile di 3,2 m con illuminazione. Colloca sotto carrelli e recuperi; riponibile con E su un palo.",
+        "orders": 0,
+        "tool": 1,
+        "limit": 4,
+        "materials": {
+          "metal": 8,
+          "aluminum": 4,
+          "electronics": 2
+        },
+        "parts": {}
+      },
+      "yard_platform": {
+        "name": "Pedana industriale",
+        "description": "Pedana scalabile di 3 m per organizzare la base e i recuperi. Riponibile con E.",
+        "orders": 0,
+        "tool": 1,
+        "limit": 8,
+        "materials": {
+          "metal": 5,
+          "rubber": 2
+        },
+        "parts": {}
+      }
+    },
+    "customers": [
+      {
+        "id": "marta",
+        "name": "Marta · artigiana del quartiere",
+        "product": "desk_lamp",
+        "orders": 1,
+        "daily_units": 3,
+        "price": 90,
+        "position": [
+          12,
+          0,
+          19
+        ]
+      },
+      {
+        "id": "enzo",
+        "name": "Enzo · manutentore",
+        "product": "toolbox",
+        "orders": 2,
+        "daily_units": 2,
+        "price": 75,
+        "position": [
+          16,
+          0,
+          19
+        ]
+      },
+      {
+        "id": "nina",
+        "name": "Nina · bottega del riuso",
+        "product": "restored_radio",
+        "orders": 2,
+        "daily_units": 2,
+        "price": 520,
+        "position": [
+          20,
+          0,
+          19
+        ]
+      },
+      {
+        "id": "bruno",
+        "name": "Bruno · capocantiere",
+        "product": "bench_compressor",
+        "orders": 3,
+        "daily_units": 1,
+        "price": 850,
+        "position": [
+          24,
+          0,
+          19
+        ]
+      },
+      {
+        "id": "ada",
+        "name": "Ada · giardini di Riva Secca",
+        "product": "garden_bench",
+        "orders": 3,
+        "daily_units": 2,
+        "price": 430,
+        "position": [
+          28,
+          0,
+          19
+        ]
+      }
+    ],
+    "story": {
+      "title": "Le tre promesse di Riva Secca",
+      "intro": "Marta ti ha affidato il vecchio deposito di Riva Secca. Qui finiva tutto ciò che il paese non sapeva più aggiustare. Enzo vuole rimettere in moto l'officina: tu puoi trasformare questo posto nel centro che mancava al quartiere. Prima riapri i servizi, poi dimostra che recuperare può creare lavoro.",
+      "chapters": [
+        {
+          "title": "Un cancello da riaprire",
+          "sender": "Marta",
+          "letter": "Non ti chiedo un impero domani. Porta i primi materiali alla bilancia e conserva quelli della commessa: possiamo rimettere in funzione il deposito.",
+          "unlock": "Con la prima commessa iniziano gli acquisti dei clienti e le richieste di ricambi."
+        },
+        {
+          "title": "Il valore è nei dettagli",
+          "sender": "Enzo",
+          "letter": "Un martello non ripara un circuito. Compra il cacciavite e apri il Lotto Est: rame e alluminio ci permettono di tornare a fare lavori di precisione.",
+          "unlock": "Banco recupero, materiali di precisione e il primo trasporto serio."
+        },
+        {
+          "title": "Oltre il recinto",
+          "sender": "Marta",
+          "letter": "Nelle dune c'è abbastanza materiale per una linea di lavoro. Apri il secondo lotto e metti in funzione la pressa. I primi clienti sono già qui: conserva qualcosa anche per loro.",
+          "unlock": "Vetro, gomma, produzione e banchina delle spedizioni."
+        },
+        {
+          "title": "Niente viaggi a vuoto",
+          "sender": "Enzo",
+          "letter": "Con il buggy puoi riportare componenti interi. Carica dal cassone, scarica al magazzino e ripara quello che vale la pena salvare. È così che il deposito diventa un'officina.",
+          "unlock": "Una flotta di recupero pronta ai contratti industriali."
+        },
+        {
+          "title": "Il nome sul cancello",
+          "sender": "Marta",
+          "letter": "L'ultima fornitura ci farà ottenere la certificazione. Poi verrà la parte che conta: clienti che ritornano, una linea affidabile e un archivio dei pezzi che abbiamo salvato.",
+          "unlock": "Certificazione, forniture continue e tre progetti per il futuro."
+        }
+      ],
+      "projects": [
+        {
+          "id": "community",
+          "name": "La fiducia del quartiere",
+          "speaker": "Marta",
+          "description": "Non basta vendere ferro: il quartiere deve tornare a usare ciò che costruiamo. Consegna prodotti finiti a entrambi i clienti.",
+          "orders": 2,
+          "reward": 1200,
+          "benefit": "I due clienti acquistano 1 prodotto in più ogni giorno. Nuova illuminazione del piazzale.",
+          "rules": [
+            {
+              "metric": "marta_sales",
+              "amount": 6,
+              "label": "Lampade vendute a Marta"
+            },
+            {
+              "metric": "enzo_sales",
+              "amount": 4,
+              "label": "Cassette vendute a Enzo"
+            }
+          ]
+        },
+        {
+          "id": "production",
+          "name": "Una linea su cui contare",
+          "speaker": "Enzo",
+          "description": "Una piccola industria si riconosce dalle consegne affidabili. Installa gli impianti e completa forniture ripetibili dopo la certificazione.",
+          "orders": 5,
+          "reward": 1800,
+          "benefit": "Cicli della pressa più rapidi del 10%, dal prossimo lotto. Targa della linea certificata.",
+          "rules": [
+            {
+              "metric": "deliveries",
+              "amount": 3,
+              "label": "Forniture industriali completate"
+            },
+            {
+              "metric": "workbench",
+              "amount": 1,
+              "label": "Banco di precisione"
+            },
+            {
+              "metric": "press_drive",
+              "amount": 2,
+              "label": "Idraulica della pressa"
+            }
+          ]
+        },
+        {
+          "id": "archive",
+          "name": "Niente è soltanto spazzatura",
+          "speaker": "Marta",
+          "description": "Impara a riconoscere i pezzi invece di ridurli tutti allo stesso metallo. Documenta i ritrovamenti e porta a termine recuperi mirati.",
+          "orders": 3,
+          "reward": 1000,
+          "benefit": "Scanner con portata aumentata del 25%. Esposizione permanente dei recuperi.",
+          "rules": [
+            {
+              "metric": "album",
+              "amount": 25,
+              "label": "Varianti scoperte nel libro"
+            },
+            {
+              "metric": "specifics",
+              "amount": 2,
+              "label": "Richieste di pezzi completate"
+            },
+            {
+              "metric": "scanner",
+              "amount": 1,
+              "label": "Scanner da campo"
+            }
+          ]
+        }
+      ],
+      "epilogue": "Il cancello non porta più il nome di una discarica abbandonata. A Riva Secca si torna qui per comprare, riparare e lavorare. Hai mantenuto le tre promesse: ora il centro è tuo. Le spedizioni, i clienti e le forniture continuano.",
+      "aftermath": {
+        "title": "Le promesse diventano lavoro",
+        "sender": "Enzo",
+        "letter": "La certificazione è arrivata. Ora manteniamo la parola data al quartiere: prodotti che tornano utili, forniture affidabili e pezzi che meritano di essere riconosciuti.",
+        "unlock": "Tre riconoscimenti permanenti. Completali tutti per concludere la storia del centro; l'attività continuerà."
+      }
+    },
+    "buggy_recovery_cost": 100,
+    "buggy_parking": [
+      22,
+      0,
+      30
+    ],
+    "outposts": [
+      {
+        "id": "north_cache",
+        "name": "Relitto del convoglio",
+        "position": [
+          -210,
+          0,
+          -360
+        ]
+      },
+      {
+        "id": "east_cache",
+        "name": "Stazione dismessa",
+        "position": [
+          390,
+          0,
+          160
+        ]
+      },
+      {
+        "id": "west_cache",
+        "name": "Cantiere delle dune",
+        "position": [
+          -390,
+          0,
+          270
+        ]
+      }
+    ],
+    "mobility": {
+      "skateboard": {
+        "name": "Skateboard da recupero",
+        "cost": 350,
+        "requires_land": 0,
+        "speed_mps": 9,
+        "acceleration": 3.4,
+        "braking": 11,
+        "coast_drag": 0.3,
+        "steering": 2.6,
+        "suspension_response": 11,
+        "jump_velocity": 5.8
+      },
+      "dirtbike": {
+        "name": "Moto da cross",
+        "cost": 2400,
+        "requires_land": 1,
+        "speed_mps": 22,
+        "acceleration": 8,
+        "braking": 19,
+        "coast_drag": 0.65,
+        "steering": 2.2,
+        "suspension_response": 9,
+        "jump_velocity": 4.2
+      }
+    }
+  },
+  "parts": {
+    "panel": {
+      "name": "Pannello recuperato",
+      "mass_kg": 8,
+      "value": 60,
+      "recycle": {
+        "metal": 4
+      }
+    },
+    "wheel": {
+      "name": "Ruota completa",
+      "mass_kg": 12,
+      "value": 95,
+      "recycle": {
+        "rubber": 4,
+        "metal": 2
+      }
+    },
+    "battery": {
+      "name": "Batteria industriale",
+      "mass_kg": 18,
+      "value": 180,
+      "recycle": {
+        "electronics": 4,
+        "plastic": 4,
+        "metal": 1
+      }
+    },
+    "engine": {
+      "name": "Motore recuperato",
+      "mass_kg": 48,
+      "value": 360,
+      "recycle": {
+        "metal": 12,
+        "copper": 6,
+        "plastic": 6
+      }
+    },
+    "frame": {
+      "name": "Telaio industriale",
+      "mass_kg": 80,
+      "value": 500,
+      "recycle": {
+        "metal": 40
+      }
+    }
+  },
+  "bulk_salvage": [
+    {
+      "id": "base_wheel",
+      "kind": "wheel",
+      "quality": 0,
+      "land": 0,
+      "position": [
+        -16,
+        0,
+        -10
+      ]
+    },
+    {
+      "id": "base_battery",
+      "kind": "battery",
+      "quality": 0,
+      "land": 0,
+      "position": [
+        8,
+        0,
+        -34
+      ]
+    },
+    {
+      "id": "base_engine",
+      "kind": "engine",
+      "quality": 0,
+      "land": 0,
+      "position": [
+        -16,
+        0,
+        -40
+      ]
+    },
+    {
+      "id": "east_engine",
+      "kind": "engine",
+      "quality": 0,
+      "land": 1,
+      "position": [
+        125,
+        0,
+        -37
+      ]
+    },
+    {
+      "id": "east_battery",
+      "kind": "battery",
+      "quality": 0,
+      "land": 1,
+      "position": [
+        144,
+        0,
+        -37
+      ]
+    },
+    {
+      "id": "dunes_frame",
+      "kind": "frame",
+      "quality": 0,
+      "land": 2,
+      "position": [
+        200,
+        0,
+        -44
+      ]
+    },
+    {
+      "id": "dunes_wheel",
+      "kind": "wheel",
+      "quality": 1,
+      "land": 2,
+      "position": [
+        228,
+        0,
+        -45
+      ]
+    },
+    {
+      "id": "desert_engine",
+      "kind": "engine",
+      "quality": 1,
+      "land": 1,
+      "position": [
+        -115,
+        0,
+        145
+      ]
+    },
+    {
+      "id": "desert_frame",
+      "kind": "frame",
+      "quality": 0,
+      "land": 1,
+      "position": [
+        160,
+        0,
+        135
+      ]
+    }
+  ],
+  "delivery_jobs": [
+    {
+      "id": "garage_spares",
+      "name": "Ricambi per le officine",
+      "description": "Fornisci componenti funzionanti: ripara quelli danneggiati al banco del Lotto Est.",
+      "materials": {
+        "electronics": 2
+      },
+      "parts": {
+        "battery": 1,
+        "wheel": 2
+      },
+      "bales": 0,
+      "reward": 520
+    },
+    {
+      "id": "municipal_load",
+      "name": "Materiali per il cantiere",
+      "description": "Un carico selezionato di plastica, vetro e metallo pressato.",
+      "materials": {
+        "plastic": 12,
+        "glass": 8
+      },
+      "parts": {},
+      "bales": 3,
+      "reward": 440
+    },
+    {
+      "id": "industrial_motors",
+      "name": "Impianto per il cantiere",
+      "description": "Recupera un motore e un telaio interi e prepara un carico industriale.",
+      "materials": {
+        "copper": 4
+      },
+      "parts": {
+        "engine": 1,
+        "frame": 1
+      },
+      "bales": 2,
+      "reward": 1350
+    },
+    {
+      "id": "town_square",
+      "name": "La piazza si riaccende",
+      "description": "Marta coordina un piccolo spazio comune: lampade costruite dal recupero, una radio restaurata e metallo pressato per le installazioni.",
+      "materials": {},
+      "parts": {},
+      "products": {
+        "desk_lamp": 3,
+        "restored_radio": 1
+      },
+      "bales": 1,
+      "reward": 1100
+    },
+    {
+      "id": "workshop_relaunch",
+      "name": "Due officine di nuovo al lavoro",
+      "description": "Fornisci compressori ricostruiti e cassette portattrezzi. I prodotti devono essere finiti, non soltanto in coda al banco.",
+      "materials": {
+        "metal": 4
+      },
+      "parts": {},
+      "products": {
+        "bench_compressor": 2,
+        "toolbox": 3
+      },
+      "bales": 0,
+      "reward": 2300
+    },
+    {
+      "id": "neighborhood_gardens",
+      "name": "I giardini di Riva Secca",
+      "description": "Ada vuole riaprire le aree comuni: panche da pannelli recuperati e lampade per i viali. Consegna alla banchina delle spedizioni.",
+      "materials": {
+        "plastic": 6
+      },
+      "parts": {},
+      "products": {
+        "garden_bench": 3,
+        "desk_lamp": 2
+      },
+      "bales": 0,
+      "reward": 1900
+    }
+  ]
+}

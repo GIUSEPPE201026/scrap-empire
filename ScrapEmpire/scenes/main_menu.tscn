@@ -1,0 +1,619 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/settings_dialog.tscn" id="2_settings"]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color(0.08, 0.1, 0.14, 0.95)
+border_width_bottom = 2
+border_width_top = 2
+border_width_left = 2
+border_width_right = 2
+border_color = Color(0.35, 0.5, 0.65, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_left = 12
+corner_radius_bottom_right = 12
+shadow_enabled = true
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_offset = Vector2(0, 4)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color(0.15, 0.22, 0.3, 1)
+border_width_bottom = 1
+border_width_top = 1
+border_width_left = 1
+border_width_right = 1
+border_color = Color(0.4, 0.55, 0.7, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color(0.2, 0.35, 0.45, 1)
+border_width_bottom = 1
+border_width_top = 1
+border_width_left = 1
+border_width_right = 1
+border_color = Color(0.5, 0.7, 0.9, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color(0.1, 0.4, 0.25, 1)
+border_width_bottom = 1
+border_width_top = 1
+border_width_left = 1
+border_width_right = 1
+border_color = Color(0.3, 0.8, 0.5, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color(0.05, 0.08, 0.12, 0.9)
+border_width_bottom = 1
+border_width_top = 1
+border_width_left = 1
+border_width_right = 1
+border_color = Color(0.3, 0.45, 0.6, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color(0.12, 0.18, 0.25, 1)
+border_width_bottom = 2
+border_width_top = 2
+border_width_left = 2
+border_width_right = 2
+border_color = Color(0.4, 0.6, 0.8, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color(0.25, 0.4, 0.55, 1)
+border_width_bottom = 2
+border_width_top = 2
+border_width_left = 2
+border_width_right = 2
+border_color = Color(0.5, 0.75, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.06, 0.08, 0.11, 1)
+
+[node name="Vignette" type="TextureRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+texture = null
+modulate = Color(0, 0, 0, 0.4)
+visible = false
+
+[node name="BgPanel" type="Panel" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.25
+anchor_top = 0.06
+anchor_right = 0.75
+anchor_bottom = 0.94
+theme_override_styles/panel = SubResource(1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="BgPanel"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.1
+anchor_top = 0.1
+anchor_right = 0.9
+anchor_bottom = 0.9
+theme_override_constants/separation = 12
+
+[node name="TitleContainer" type="HBoxContainer" parent="BgPanel/VBoxContainer"]
+theme_override_constants/separation = 10
+
+[node name="TitleIcon" type="Label" parent="BgPanel/VBoxContainer/TitleContainer"]
+text = "⬡"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 56
+theme_override_colors/font_color = Color(0.85, 0.7, 0.2, 1)
+
+[node name="Title" type="Label" parent="BgPanel/VBoxContainer/TitleContainer"]
+text = "SCRAP EMPIRE"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 44
+theme_override_colors/font_color = Color(0.9, 0.75, 0.25, 1)
+theme_override_colors/outline_color = Color(0.1, 0.08, 0.05, 1)
+theme_override_colors/outline_size = 3
+size_flags_horizontal = 2
+
+[node name="Subtitle" type="Label" parent="BgPanel/VBoxContainer"]
+text = "Raccogli · Deposita · Vendi · Migliora"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 1)
+
+[node name="Version" type="Label" parent="BgPanel/VBoxContainer"]
+text = "Prototype v0.1  •  Godot 4.3 Compatibility"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.45, 0.55, 0.65, 1)
+
+[node name="HSeparator" type="HSeparator" parent="BgPanel/VBoxContainer"]
+theme_override_colors/separator_color = Color(0.3, 0.45, 0.6, 0.5)
+
+[node name="BtnSinglePlayer" type="Button" parent="BgPanel/VBoxContainer"]
+text = "Giocatore Singolo"
+theme_override_styles/normal = SubResource(2)
+theme_override_styles/hover = SubResource(3)
+theme_override_styles/pressed = SubResource(4)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 22
+custom_minimum_size = Vector2(0, 56)
+tooltip_text = "Avvia una partita in solitaria contro l'ambiente"
+
+[node name="BtnHost" type="Button" parent="BgPanel/VBoxContainer"]
+text = "Ospita Partita"
+theme_override_styles/normal = SubResource(2)
+theme_override_styles/hover = SubResource(3)
+theme_override_styles/pressed = SubResource(4)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 22
+custom_minimum_size = Vector2(0, 56)
+tooltip_text = "Crea una sessione multiplayer per gli amici"
+
+[node name="BtnJoin" type="Button" parent="BgPanel/VBoxContainer"]
+text = "Unisciti a Partita"
+theme_override_styles/normal = SubResource(2)
+theme_override_styles/hover = SubResource(3)
+theme_override_styles/pressed = SubResource(4)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 22
+custom_minimum_size = Vector2(0, 56)
+tooltip_text = "Connettiti a una sessione esistente"
+
+[node name="BtnOptions" type="Button" parent="BgPanel/VBoxContainer"]
+text = "Opzioni"
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(7)
+theme_override_font_sizes/font_size = 20
+custom_minimum_size = Vector2(0, 48)
+tooltip_text = "Impostazioni grafiche, audio e controlli"
+
+[node name="BtnQuit" type="Button" parent="BgPanel/VBoxContainer"]
+text = "Esci"
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(7)
+theme_override_font_sizes/font_size = 20
+custom_minimum_size = Vector2(0, 48)
+tooltip_text = "Chiudi il gioco"
+
+[node name="InfoPanel" type="Panel" parent="BgPanel"]
+layout_mode = 3
+anchors_preset = 10
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -60
+offset_bottom = -10
+theme_override_styles/panel = SubResource(5)
+
+[node name="InfoLabel" type="Label" parent="BgPanel/InfoPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+text = "WASD: muovi · Mouse: guarda · Tieni sinistro: raccogli\nE: deposito e officina · Esc: pausa"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.55, 0.65, 0.75, 0.8)
+
+[node name="DialogHost" type="AcceptDialog" parent="."]
+title = "Ospita Partita"
+dialog_text = "Porta UDP:"
+hide_on_ok = false
+
+[node name="InputPortHost" type="LineEdit" parent="DialogHost"]
+placeholder_text = "24567"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(6)
+
+[node name="DialogJoin" type="AcceptDialog" parent="."]
+title = "Unisciti a Partita"
+dialog_text = "Indirizzo IP e Porta:"
+hide_on_ok = false
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="DialogJoin"]
+theme_override_constants/separation = 10
+
+[node name="InputIpJoin" type="LineEdit" parent="DialogJoin/VBoxContainer2"]
+placeholder_text = "127.0.0.1"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(6)
+
+[node name="InputPortJoin" type="LineEdit" parent="DialogJoin/VBoxContainer2"]
+placeholder_text = "24567"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(6)
+
+[node name="NameDialog" type="AcceptDialog" parent="."]
+title = "Nome Giocatore"
+dialog_text = "Inserisci il tuo nome (max 24 caratteri):"
+hide_on_ok = false
+
+[node name="InputName" type="LineEdit" parent="NameDialog"]
+placeholder_text = "Player"
+max_length = 24
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(6)
+
+[node name="OptionsDialog" type="PopupPanel" parent="."]
+popup_centered = true
+title = "Opzioni"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="OptionsDialog"]
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24
+offset_top = 24
+offset_right = -24
+offset_bottom = -24
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="OptionsDialog/VBoxContainer"]
+text = "IMPOSTAZIONI"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.9, 0.75, 0.25, 1)
+theme_override_colors/outline_color = Color(0, 0, 0, 0.8)
+theme_override_colors/outline_size = 2
+
+[node name="Separator" type="HSeparator" parent="OptionsDialog/VBoxContainer"]
+theme_override_colors/separator_color = Color(0.3, 0.45, 0.6, 0.5)
+
+[node name="GraphicsTab" type="TabContainer" parent="OptionsDialog/VBoxContainer"]
+size_flags_vertical = 3
+
+[node name="Graphics" type="VBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab" title="Grafica"]
+theme_override_constants/separation = 12
+
+[node name="Graphics/QualityLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+text = "Qualità Grafica"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="Graphics/QualityOptions" type="OptionButton" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(2)
+theme_override_styles/hover = SubResource(3)
+theme_override_styles/pressed = SubResource(3)
+theme_override_styles/focus = SubResource(3)
+theme_override_font_sizes/font_size = 16
+
+[node name="Graphics/VSyncLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+text = "VSync"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="Graphics/VSyncOptions" type="OptionButton" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(2)
+theme_override_styles/hover = SubResource(3)
+theme_override_styles/pressed = SubResource(3)
+theme_override_styles/focus = SubResource(3)
+theme_override_font_sizes/font_size = 16
+
+[node name="Graphics/FOVLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+text = "Campo Visivo (FOV)"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="Graphics/FOVSlider" type="HSlider" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+size_flags_horizontal = 3
+min_value = 60.0
+max_value = 110.0
+step = 1.0
+value = 80.0
+
+[node name="Graphics/FOVValue" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Graphics"]
+text = "80°"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 1)
+
+[node name="Audio" type="VBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab" title="Audio"]
+theme_override_constants/separation = 12
+
+[node name="Audio/MasterLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+text = "Volume Master"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="Audio/MasterSlider" type="HSlider" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="Audio/MasterValue" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+text = "100%"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 1)
+
+[node name="Audio/SFXLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+text = "Volume Effetti (SFX)"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="Audio/SFXSlider" type="HSlider" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 1.0
+
+[node name="Audio/SFXValue" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+text = "100%"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 1)
+
+[node name="Audio/MusicLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+text = "Volume Musica"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="Audio/MusicSlider" type="HSlider" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 1.0
+step = 0.05
+value = 0.7
+
+[node name="Audio/MusicValue" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Audio"]
+text = "70%"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 1)
+
+[node name="Controls" type="VBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab" title="Controlli"]
+theme_override_constants/separation = 12
+
+[node name="SensitivityLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+text = "Sensibilità Mouse"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="SensitivitySlider" type="HSlider" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+size_flags_horizontal = 3
+min_value = 0.0005
+max_value = 0.005
+step = 0.0001
+value = 0.002
+
+[node name="SensitivityValue" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+text = "0.002"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.6, 0.75, 0.85, 1)
+
+[node name="InvertYLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+text = "Inverti Asse Y (Mouse)"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="InvertYCheck" type="CheckButton" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+text = ""
+size_flags_horizontal = 1
+
+[node name="KeybindsLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+text = "Tasti (Premi per riassegnare)"
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+
+[node name="KeybindContainer" type="VBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls"]
+theme_override_constants/separation = 8
+
+[node name="MoveForward" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveForward"]
+text = "Avanti"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveForward"]
+text = "W"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="MoveBack" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveBack"]
+text = "Indietro"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveBack"]
+text = "S"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="MoveLeft" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveLeft"]
+text = "Sinistra"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveLeft"]
+text = "A"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="MoveRight" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveRight"]
+text = "Destra"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/MoveRight"]
+text = "D"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="Jump" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/Jump"]
+text = "Salta"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/Jump"]
+text = "Spazio"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="Sprint" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/Sprint"]
+text = "Corri"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/Sprint"]
+text = "Shift"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="Interact" type="HBoxContainer" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer"]
+theme_override_constants/separation = 10
+
+[node name="ActionLabel" type="Label" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/Interact"]
+text = "Interagisci/Deposita"
+size_flags_horizontal = 1
+custom_minimum_size = Vector2(100, 0)
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+
+[node name="KeyButton" type="Button" parent="OptionsDialog/VBoxContainer/GraphicsTab/Controls/KeybindContainer/Interact"]
+text = "E"
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_styles/focus = SubResource(7)
+theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(80, 36)
+
+[node name="ButtonContainer" type="HBoxContainer" parent="OptionsDialog/VBoxContainer"]
+theme_override_constants/separation = 12
+size_flags_horizontal = 1
+size_flags_vertical = 0
+custom_minimum_size = Vector2(0, 48)
+
+[node name="Spacer" type="Control" parent="OptionsDialog/VBoxContainer/ButtonContainer"]
+size_flags_horizontal = 3
+
+[node name="BtnResetDefaults" type="Button" parent="OptionsDialog/VBoxContainer/ButtonContainer"]
+text = "Ripristina Default"
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_font_sizes/font_size = 16
+custom_minimum_size = Vector2(160, 48)
+
+[node name="BtnApply" type="Button" parent="OptionsDialog/VBoxContainer/ButtonContainer"]
+text = "Applica"
+theme_override_styles/normal = SubResource(4)
+theme_override_styles/hover = SubResource(3)
+theme_override_styles/pressed = SubResource(3)
+theme_override_font_sizes/font_size = 16
+custom_minimum_size = Vector2(120, 48)
+
+[node name="BtnCancel" type="Button" parent="OptionsDialog/VBoxContainer/ButtonContainer"]
+text = "Annulla"
+theme_override_styles/normal = SubResource(5)
+theme_override_styles/hover = SubResource(6)
+theme_override_styles/pressed = SubResource(6)
+theme_override_font_sizes/font_size = 16
+custom_minimum_size = Vector2(120, 48)
+
+[node name="SettingsDialog" parent="." instance=ExtResource("2_settings")]

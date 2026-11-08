@@ -1,0 +1,37 @@
+extends "res://tests/crafting_test.gd"
+
+func run() -> void:
+	get_tree().current_scene=null
+	SaveService.SAVE_DIR="res://test_logs/closure_controls_%d/" % Time.get_ticks_usec()
+	SaveService._ensure_save_dir()
+	SessionState.progression_loaded=true
+	get_tree().change_scene_to_file("res://scenes/boot.tscn")
+	await frames(8)
+	get_tree().current_scene._on_single_pressed()
+	await frames(25)
+	var player=get_tree().get_first_node_in_group("players")
+	player.position=Vector3(340,preload("res://scripts/gameplay/desert_world.gd").height_at(Vector3(340,0,200))+0.08,200)
+	await frames(12)
+	var position: Vector3=player.global_position
+	player._open_inventory()
+	check(Input.mouse_mode==Input.MOUSE_MODE_VISIBLE,"opening equipment releases pointer")
+	player._close_pause_menu()
+	check(Input.mouse_mode==Input.MOUSE_MODE_VISIBLE,"switching panels does not transiently capture and centre pointer")
+	player._open_cargo("plastic")
+	await frames(3)
+	check(player._is_paused and Input.mouse_mode==Input.MOUSE_MODE_VISIBLE,"deferred gameplay capture cannot steal pointer from replacement menu")
+	await click(player,"Metallo")
+	check(player._material_selection=="metal" and player.global_position.distance_to(position)<0.01,"material selection changes neither player world position nor current context")
+	player._close_pause_menu()
+	await frames(3)
+	check(Input.mouse_mode==Input.MOUSE_MODE_CAPTURED if DisplayServer.get_name()!="headless" else not player._is_paused,"actual resume returns control to gameplay (native mouse capture checked with renderer)")
+	player._route_career_map("crash")
+	player._open_career("map")
+	await click(player,"Rimuovi meta")
+	check(player._navigation_label.is_empty() and not player._career_tracking,"map action removes manual and automatic destination")
+	player._close_pause_menu()
+	await frames(25)
+	check(player._navigation_label.is_empty(),"removed destination does not silently return on next objective refresh")
+	await capture("closure_navigation_cleared")
+	print("CLOSURE_CONTROLS_RESULT: %d checks, %d failures" % [checks,failures])
+	get_tree().quit(1 if failures else 0)

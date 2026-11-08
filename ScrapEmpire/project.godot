@@ -1,0 +1,164 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="ScrapEmpire"
+run/main_scene="res://scenes/boot.tscn"
+config/features=PackedStringArray("4.3")
+
+[autoload]
+
+SessionState="*res://scripts/core/session_state.gd"
+GameState="*res://scripts/core/game_state.gd"
+CommandService="*res://scripts/core/command_service.gd"
+NetworkGateway="*res://scripts/network/network_gateway.gd"
+ReplicationService="*res://scripts/network/replication_service.gd"
+InventoryService="*res://scripts/economy/inventory_service.gd"
+EconomyService="*res://scripts/economy/economy_service.gd"
+ContractService="*res://scripts/economy/contract_service.gd"
+SaveService="*res://scripts/save/save_service.gd"
+
+[debug]
+
+settings/stdout/verbose_stdout=true
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=800
+window/size/mode=0
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[input]
+
+move_forward={
+"deadzone": 0.5,
+"events": [{
+"keycode": 87,
+"physical_keycode": 87,
+"type": "Key"
+}, {
+"axis": 1,
+"axis_value": -1.0,
+"type": "JoyAxis"
+}],
+"strength": 1.0
+}
+move_back={
+"deadzone": 0.5,
+"events": [{
+"keycode": 83,
+"physical_keycode": 83,
+"type": "Key"
+}, {
+"axis": 1,
+"axis_value": 1.0,
+"type": "JoyAxis"
+}],
+"strength": 1.0
+}
+move_left={
+"deadzone": 0.5,
+"events": [{
+"keycode": 65,
+"physical_keycode": 65,
+"type": "Key"
+}, {
+"axis": 0,
+"axis_value": -1.0,
+"type": "JoyAxis"
+}],
+"strength": 1.0
+}
+move_right={
+"deadzone": 0.5,
+"events": [{
+"keycode": 68,
+"physical_keycode": 68,
+"type": "Key"
+}, {
+"axis": 0,
+"axis_value": 1.0,
+"type": "JoyAxis"
+}],
+"strength": 1.0
+}
+jump={
+"deadzone": 0.5,
+"events": [{
+"keycode": 32,
+"physical_keycode": 32,
+"type": "Key"
+}],
+"strength": 1.0
+}
+sprint={
+"deadzone": 0.5,
+"events": [{
+"keycode": 16,
+"physical_keycode": 16,
+"type": "Key"
+}],
+"strength": 1.0
+}
+interact={
+"deadzone": 0.5,
+"events": [{
+"keycode": 69,
+"physical_keycode": 69,
+"type": "Key"
+}],
+"strength": 1.0
+}
+collect={
+"deadzone": 0.5,
+"events": [{
+"button_index": 1,
+"type": "MouseButton"
+}],
+"strength": 1.0
+}
+pause={
+"deadzone": 0.5,
+"events": [{
+"keycode": 27,
+"physical_keycode": 27,
+"type": "Key"
+}],
+"strength": 1.0
+}
+toggle_team={
+"deadzone": 0.5,
+"events": [{
+"keycode": 9,
+"physical_keycode": 9,
+"type": "Key"
+}],
+"strength": 1.0
+}
+
+[network]
+
+limits/packet_peer/enet_max_peers=4
+limits/packet_peer/enet_channel_count=3
+limits/packet_peer/enet_timeout_ms=60000
+limits/packet_peer/enet_timeout_max_ms=60000
+
+[physics]
+
+physics/common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+rendering/quality/shadows/quality=1
+rendering/environment/defaults/default_clear_color=Color(0.11, 0.15, 0.2, 1)

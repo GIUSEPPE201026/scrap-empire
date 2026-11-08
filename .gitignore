@@ -1,0 +1,11 @@
+**/.godot/
+**/test_logs/
+**/*.log
+**/*.tmp
+**/*.pck
+**/*.exe
+**/*.zip
+**/export_credentials.cfg
+dist/
+.env
+.env.*
