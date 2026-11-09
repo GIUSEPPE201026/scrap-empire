@@ -21,7 +21,7 @@ static func build(player: Node) -> void:
 		card.add_child(title)
 		for rule in project.rules:
 			var have: int=service.metric(rule.metric)
-			var label=ART.label("%s · %d/%d" % [rule.label,have,rule.amount],14,UI.MUTED)
+			var label=ART.label(Localization.format_text("%s · %d/%d", [rule.label,have,rule.amount]),14,UI.MUTED)
 			label.custom_minimum_size.x=235
 			label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			card.add_child(label)
@@ -33,7 +33,7 @@ static func build(player: Node) -> void:
 		var reward=Button.new()
 		reward.disabled=not service.ready(project.id)
 		reward.pressed.connect(player._claim_career.bind(project.id))
-		UI.action(reward,"Realizzato" if service.has_project(project.id) else "Riscuoti · %d" % project.reward,not reward.disabled)
+		UI.action(reward,"Realizzato" if service.has_project(project.id) else Localization.text("Riscuoti · %d") % project.reward,not reward.disabled)
 		reward.set_meta("action_label","OTTIENI RICONOSCIMENTO")
 		reward.tooltip_text=project.benefit
 		card.add_child(reward)

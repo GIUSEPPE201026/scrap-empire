@@ -56,6 +56,7 @@ func beam(parent: Node3D, start: Vector3, finish: Vector3, width: float, color: 
 	visual.basis = Basis.looking_at((finish - start).normalized(), Vector3.UP if absf((finish - start).normalized().y) < 0.98 else Vector3.RIGHT)
 
 func sign_text(parent: Node3D, caption: String, location: Vector3, font_size: int = 60, billboard: bool = false) -> Label3D:
+	Localization.register_sign(caption)
 	var label = Label3D.new()
 	label.text = caption
 	label.position = location

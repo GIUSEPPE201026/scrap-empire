@@ -170,10 +170,10 @@ func spawn_owned_vehicles() -> void:
 				vehicle.body.collision_layer = 0
 	for kind in GameState.operations.get("mobility",{}).get("owned",[]):
 		if get_tree().get_nodes_in_group("yard_vehicles").any(func(node):return node.vehicle_kind==kind): continue
-		var extra=preload("res://scripts/gameplay/extra_vehicle.gd").new()
+		var extra=preload("res://scripts/gameplay/industrial_machine.gd").new() if kind in ["crane","loader"] else (preload("res://scripts/gameplay/forklift.gd").new() if kind=="forklift" else preload("res://scripts/gameplay/extra_vehicle.gd").new())
 		extra.vehicle_kind=kind
-		extra.level=1 if kind=="skateboard" else 3
-		extra.position=Vector3(18,0,25)
+		extra.level={"skateboard":1,"dirtbike":3,"forklift":4,"crane":5,"loader":6}[kind]
+		extra.position=Vector3(24+(extra.level-4)*6,0,25) if extra.level>=4 else Vector3(18,0,25)
 		add_child(extra)
 		if kind=="skateboard":
 			extra.hide()

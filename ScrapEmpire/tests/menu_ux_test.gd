@@ -167,7 +167,8 @@ func run() -> void:
 		else:
 			await click_physical_button(monitor,tab)
 		await frames(3)
-		check(monitor.module_category==category and monitor.buy_buttons.size() in [3,4,5],"physical tab selects focused module category: "+category)
+		var expected: Array={"vehicles":["motor","suspension","cargo_rack","brakes","tyres","bike_handling","tow_package","hydraulics","industrial_drive"],"recovery":["gloves","harness","scanner","headlamp","vacuum"],"production":["press_drive","workbench","assembly"]}[category]
+		check(monitor.module_category==category and monitor.buy_buttons.size()==expected.size() and expected.all(func(id):return monitor.buy_buttons.has(id)),"physical tab exposes correct modules: "+category)
 		audit_monitor(monitor,category)
 		await capture("ux_modules_"+category)
 	GameState.completed_orders=GameState.order_defs.map(func(order):return order.id)

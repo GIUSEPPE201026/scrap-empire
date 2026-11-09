@@ -14,7 +14,7 @@ static func variant_for(id: String) -> int:
 	return 4 if id.get_slice("_",1).to_int()%12==11 else absi(id.hash())%4
 
 static func item_name(type: int, variant: int) -> String:
-	return NAMES[type][variant] if type < NAMES.size() else "Rottame"
+	return Localization.text(NAMES[type][variant] if type < NAMES.size() else "Rottame")
 
 static func build(root: Node3D, type: int, variant: int, art) -> void:
 	var steel = art.STEEL

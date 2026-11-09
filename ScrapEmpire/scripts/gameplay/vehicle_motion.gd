@@ -27,6 +27,7 @@ var _delta: float = 1.0/60.0
 var drift_blend: float = 0.0
 var drift_angle: float = 0.0
 var drifting: bool=false
+var wheelie: float=0.0
 
 func reset(yaw: float, inherited_velocity: Vector3, definition: Dictionary) -> void:
 	heading = yaw
@@ -50,6 +51,7 @@ func reset(yaw: float, inherited_velocity: Vector3, definition: Dictionary) -> v
 	drift_blend=0.0
 	drift_angle=0.0
 	drifting=false
+	wheelie=0.0
 
 func sample_contacts(body: CharacterBody3D, vehicle: Node3D) -> void:
 	var half_length: float = 0.54 if vehicle.level == 1 else 1.15
@@ -100,7 +102,7 @@ func sample_contacts(body: CharacterBody3D, vehicle: Node3D) -> void:
 			total+=point.y
 		contact_offset = clampf(total/contacts-body.global_position.y, -0.95, 0.6)
 
-func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: float, jump: bool, delta: float) -> void:
+func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: float, jump: bool, delta: float, rear_brake: bool=false) -> void:
 	_vehicle=vehicle
 	_delta=delta
 	jump_lock = maxf(0.0, jump_lock - delta)
@@ -113,6 +115,23 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 	var suspension: float = GameState.module_effect("suspension")
 	var top_speed: float = float(config.speed_mps) * motor
 	var acceleration: float = float(config.acceleration) * motor
+	if vehicle.level in [4,5,6]:
+		top_speed*=GameState.module_effect("industrial_drive")
+		acceleration*=GameState.module_effect("industrial_drive")
+	if vehicle.vehicle_kind in ["crane","loader"] and not vehicle.load_items.is_empty():
+		top_speed*=0.65
+		acceleration*=0.7/(1.0+vehicle.payload_mass()/float(config.capacity_kg))
+	if vehicle.vehicle_kind=="forklift" and is_instance_valid(vehicle.carried):
+		top_speed*=0.55 if vehicle.lift>0.6 else 0.8
+		acceleration*=0.7
+	if is_instance_valid(body.get("_towed_cart")) and vehicle.level in [2,3]:
+		var trailer_mass: float=GameState.crafting.cart_mass(body._towed_cart.craft_id)
+		top_speed*=float(GameState.logistics_def.crafting.handcart.towing[vehicle.vehicle_kind].speed_multiplier)
+		acceleration*=minf(0.95,0.75*GameState.module_effect("tow_package"))/(1.0+trailer_mass/(100.0*GameState.module_effect("tow_package")))
+		if throttle<0: top_speed*=0.45
+		if body.global_position.distance_to(body._towed_cart.global_position)>5.0:
+			throttle=0.0
+			speed=move_toward(speed,0.0,12.0*delta)
 	if vehicle.vehicle_kind=="skateboard": acceleration*=0.35+0.65*maxf(0,sin(vehicle.push_clock*7))
 	if vehicle.level == 2:
 		var load_ratio: float = minf(GameState.ops.cargo_mass()/float(GameState.logistics_def.cargo_capacity_kg),2.0)
@@ -120,6 +139,9 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 		acceleration *= 1.0-load_ratio*0.18
 	var braking: float = float(config.braking)*(GameState.module_effect("brakes") if vehicle.level==2 else 1.0)
 	var tyre_grip: float = GameState.module_effect("tyres") if vehicle.level==2 else 1.0
+	if vehicle.level==3:
+		braking*=GameState.module_effect("bike_handling")
+		tyre_grip=GameState.module_effect("bike_handling")
 	var opposite: bool = throttle * speed < -0.1
 	if grounded:
 		if absf(throttle) > 0.01:
@@ -133,8 +155,8 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 		# Climbing costs torque; descents gently accelerate rather than magnetic adhesion.
 		speed += Vector3.DOWN.dot(tangent) * 9.81 * delta
 		speed = clampf(speed, -top_speed * 0.4, top_speed * 1.65)
-	var holding_brake: bool = vehicle.level in [2,3] and parking_brake
-	var handbrake: bool = vehicle.level==2 and jump and not parking_brake
+	var holding_brake: bool = vehicle.level in [2,3,4,5,6] and parking_brake
+	var handbrake: bool = (vehicle.level==2 and jump or vehicle.level==3 and rear_brake) and not parking_brake
 	if grounded and holding_brake:
 		speed = move_toward(speed,0.0,braking*1.4*delta)
 	elif grounded and handbrake:
@@ -154,7 +176,10 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 			var new_heading=(front-rear).normalized()
 			heading=atan2(-new_heading.x,-new_heading.z)
 	else:
-		heading -= steering * steering_rate * delta * clampf(absf(speed) / 2, 0, 1) * signf(speed) * (1.0 if grounded else 0.12)
+		steer_angle=move_toward(steer_angle,steering,delta*3.5)
+		if vehicle.level==3:
+			steering_rate=minf(steering_rate,(12.0 if handbrake else 8.0)*tyre_grip/maxf(absf(speed),2.0))
+		heading -= steer_angle * steering_rate * delta * clampf(absf(speed) / 2, 0, 1) * signf(speed) * (1.0 if grounded else 0.12) * (1.0-wheelie*0.65)
 	var direction = Vector3(-sin(heading), 0, -cos(heading))
 	var desired: Vector3 = direction * speed
 	if grounded:
@@ -167,11 +192,11 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 		planar+=forward*clampf(speed-longitudinal,-braking*delta,acceleration*delta)
 		var slip: float=acos(clampf(planar.normalized().dot(forward*signf(speed)),-1,1)) if planar.length()>0.5 else 0.0
 		if handbrake and absf(speed)>2.5 and absf(steering)>0.1: drifting=true
-		if not handbrake and (slip<0.12 or planar.length()<2.5): drifting=false
-		drift_blend=move_toward(drift_blend,1.0 if drifting else 0.0,delta*5.0)
+		if not handbrake: drifting=false
+		drift_blend=move_toward(drift_blend,1.0 if drifting else 0.0,delta*(5.0 if drifting else 1.2))
 		# KidsCanCode traction_fast/slow, expressed as rates for frame independence.
 		# Countersteer aligns the chassis with travel and restores ordinary grip.
-		var traction: float=1.25*tyre_grip if drifting else 10.0*tyre_grip
+		var traction: float=lerpf(10.0,1.25,drift_blend)*tyre_grip
 		var travel_heading=forward*(1.0 if planar.dot(forward)>=0 else -1.0)
 		planar=planar.lerp(travel_heading*planar.length(),1.0-exp(-traction*delta))
 		body.velocity=planar-normal*0.15
@@ -209,9 +234,13 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 			angular_remaining -= dt
 		vehicle.visual.rotation = Vector3(body_angles.x,0,body_angles.y)
 	else:
-		if vehicle.level==3: lean=steering*speed_ratio*0.32
+		if vehicle.level==3:
+			var lifting: bool=grounded and speed>3.0 and throttle>0.1 and not parking_brake and not rear_brake and Input.is_action_pressed("sprint")
+			wheelie=move_toward(wheelie,0.55 if lifting else 0.0,delta*(0.85 if lifting else 1.8))
+			lean=steer_angle*speed_ratio*0.32
 		elif vehicle.vehicle_kind=="skateboard": lean=steering*speed_ratio*0.12
-		vehicle.visual.basis = chassis * Basis(Vector3.FORWARD, lean)
+		var target_basis: Basis=chassis * Basis(Vector3.FORWARD, lean) * Basis(Vector3.RIGHT,wheelie)
+		vehicle.visual.basis = vehicle.visual.basis.slerp(target_basis,1.0-exp(-8.0*delta)).orthonormalized()
 	last_speed = speed
 	# Damped spring in small steps: bounded travel and no unstable large-frame bounce.
 	var remaining: float = minf(delta,0.1)
@@ -222,15 +251,20 @@ func step(body: CharacterBody3D, vehicle: Node3D, throttle: float, steering: flo
 		vehicle.visual.position.y = clampf(vehicle.visual.position.y+suspension_velocity*dt,-0.95,0.6)
 		remaining -= dt
 	vehicle.animate_wheels(wheel_distance, steering)
-	if vehicle.level in [2,3]:
+	if vehicle.level in [2,3,4,5,6]:
 		for wheel in vehicle.wheels:
 			wheel.rotation.y=-steer_angle if wheel.get_meta("front") else 0.0
+			if vehicle.vehicle_kind=="forklift": wheel.rotation.y=steer_angle*0.6 if not wheel.get_meta("front") else 0.0
 		_align_wheels(body,vehicle)
 
 func _align_wheels(body: CharacterBody3D, vehicle: Node3D) -> void:
 	var axis: Vector3=vehicle.visual.global_basis.y.normalized()
 	for wheel in vehicle.wheels:
 		var base: Vector3=wheel.get_meta("rest_position")
+		if vehicle.level==3 and wheelie>0.02 and base.z<0:
+			wheel.position.y=base.y
+			wheel.set_meta("grounded",false)
+			continue
 		var strut: Vector3=vehicle.visual.to_global(base)
 		var hit: Dictionary=body.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(strut+axis*0.7,strut-axis*1.5,1,[body.get_rid(),vehicle.body.get_rid()]))
 		wheel.set_meta("grounded",false)
@@ -263,6 +297,7 @@ func after_slide(body: CharacterBody3D) -> void:
 		# (and the gravity added above), especially on steeper descents.
 		# Carry the actual travelled vector into the next integration instead.
 		body.velocity=body.get_real_velocity()
-	if is_instance_valid(_vehicle) and _vehicle.level in [2,3]:
+	if is_instance_valid(_vehicle) and _vehicle.level in [2,3,4,5,6]:
 		_align_wheels(body,_vehicle)
 		_vehicle.update_tracks(body,_delta,speed)
+		_vehicle.update_dust(body,absf(speed),drift_angle)

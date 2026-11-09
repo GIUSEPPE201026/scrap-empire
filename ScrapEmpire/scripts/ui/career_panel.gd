@@ -35,9 +35,9 @@ static func story(player: Node) -> void:
 		for material in order.materials:
 			ART.ingredient(rows,UI._material_name(material),GameState.team_deposit_counts.get(material,0),order.materials[material])
 		if int(order.bales)>0:
-			UI._text(rows,"Balle pronte: %d / %d" % [GameState.press_bales,order.bales],17)
+			UI._text(rows,Localization.format_text("Balle pronte: %d / %d", [GameState.press_bales,order.bales]),17)
 	UI._text(rows,chapter.title,20,Color("#83c4ac"))
-	ART.details(rows,chapter.letter+"\n\n"+chapter.unlock,"Lettera · "+chapter.sender)
+	ART.details(rows,chapter.letter+"\n\n"+chapter.unlock,Localization.text("Lettera · ")+chapter.sender)
 	ART.details(rows,service.definition().epilogue if service.complete() else service.definition().intro,"Riva Secca")
 	ART.details(rows,"COME SI RIPARTE\n1. Tieni premuto il comando di raccolta sul pezzo con l'attrezzo adatto.\n2. Alla bilancia deposita: conserva le scorte per le ricette e le commesse. Vendi gli avanzi per finanziare gli acquisti.\n3. Al monitor dell'ufficio consegna le commesse; garage per costruire e acquistare i mezzi.")
 	var actions = HBoxContainer.new()

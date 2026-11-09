@@ -22,13 +22,13 @@ static func purchase(player: Node) -> void:
 	detail.add_theme_constant_override("separation",14)
 	body.add_child(detail)
 	detail.add_child(ART.label("PRESSA P-01",26,UI.PAPER))
-	detail.add_child(ART.label("%d metalli → 1 balla" % GameState.press_def.input_units,22,UI.ORANGE))
+	detail.add_child(ART.label(Localization.text("%d metalli → 1 balla") % GameState.press_def.input_units,22,UI.ORANGE))
 	var flow=HBoxContainer.new()
 	detail.add_child(flow)
 	UI.picture(flow,"metal",Vector2(76,76))
 	flow.add_child(ART.label("→",24,UI.MUTED))
 	UI.picture(flow,"bale",Vector2(92,76))
-	detail.add_child(ART.label("%.0f s / lotto · %d Bulloni / balla" % [GameState.press_cycle_seconds(),GameState.get_bale_value()],15,UI.MUTED))
+	detail.add_child(ART.label(Localization.format_text("%.0f s / lotto · %d Bulloni / balla", [GameState.press_cycle_seconds(),GameState.get_bale_value()]),15,UI.MUTED))
 	player._station_status=Label.new()
 	detail.add_child(player._station_status)
 	player._station_status.hide()
@@ -71,16 +71,16 @@ static func production(player: Node) -> void:
 	UI.picture(flow,"metal",Vector2(65,65))
 	flow.add_child(ART.label("×%d  →" % GameState.press_def.input_units,22,UI.PAPER))
 	UI.picture(flow,"bale",Vector2(84,65))
-	recipe.add_child(ART.label("1 balla · %d Bulloni" % GameState.get_bale_value(),22,UI.ORANGE))
-	recipe.add_child(ART.label("%.0f s / lotto · metalli disponibili %d" % [GameState.press_cycle_seconds(),GameState.team_deposit_counts.metal],14,UI.MUTED))
-	var state=ART.label("PRONTA" if GameState.press_remaining<=0 else "LOTTO ATTIVO · %.1f s" % GameState.press_remaining,15,UI.PAPER)
+	recipe.add_child(ART.label(Localization.text("1 balla · %d Bulloni") % GameState.get_bale_value(),22,UI.ORANGE))
+	recipe.add_child(ART.label(Localization.format_text("%.0f s / lotto · metalli disponibili %d", [GameState.press_cycle_seconds(),GameState.team_deposit_counts.metal]),14,UI.MUTED))
+	var state=ART.label("PRONTA" if GameState.press_remaining<=0 else Localization.text("LOTTO ATTIVO · %.1f s") % GameState.press_remaining,15,UI.PAPER)
 	recipe.add_child(state)
 	var progress=ProgressBar.new()
 	progress.value=100.0*(1.0-GameState.press_remaining/GameState.press_cycle_seconds()) if GameState.press_remaining>0 else 0
 	progress.show_percentage=false
 	progress.custom_minimum_size.y=8
 	recipe.add_child(progress)
-	player._panel_box.add_child(ART.label("IN CODA: %d     /     BALLE PRONTE: %d" % [GameState.operations.press_queue,GameState.press_bales],18,UI.PAPER))
+	player._panel_box.add_child(ART.label(Localization.format_text("IN CODA: %d     /     BALLE PRONTE: %d", [GameState.operations.press_queue,GameState.press_bales]),18,UI.PAPER))
 	var queue=HBoxContainer.new()
 	player._panel_box.add_child(queue)
 	for index in mini(8,int(GameState.operations.press_queue)): UI.picture(queue,"bale",Vector2(45,34))
@@ -90,8 +90,8 @@ static func production(player: Node) -> void:
 	actions.add_theme_constant_override("separation",10)
 	player._panel_box.add_child(actions)
 	for count in [1,5]:
-		action(actions,"ACCODA %d %s" % [count,"LOTTO" if count==1 else "LOTTI"],player,"queue",count,GameState.press_owned and available>=count)
-	action(actions,"MASSIMO · %d LOTTI" % maxi(0,available),player,"queue",maxi(0,available),GameState.press_owned and available>0)
+		action(actions,Localization.format_text("ACCODA %d %s", [count,"LOTTO" if count==1 else "LOTTI"]),player,"queue",count,GameState.press_owned and available>=count)
+	action(actions,Localization.text("MASSIMO · %d LOTTI") % maxi(0,available),player,"queue",maxi(0,available),GameState.press_owned and available>0)
 	action(actions,"Annulla coda",player,"cancel_queue",0,int(GameState.operations.press_queue)>0).tooltip_text="ANNULLA I LOTTI IN ATTESA · RESTITUISCI I MATERIALI"
 	var feed=CheckButton.new()
 	feed.text="Spegni tramoggia" if GameState.operations.autofeed else "Attiva tramoggia"

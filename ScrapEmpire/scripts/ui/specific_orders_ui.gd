@@ -26,7 +26,7 @@ static func build(column: VBoxContainer, player: Node, active: bool) -> void:
 		var title=ART.label(job.name,21,UI.PAPER)
 		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		heading.add_child(title)
-		heading.add_child(ART.label("+%d Bulloni" % job.reward,21,UI.ORANGE))
+		heading.add_child(ART.label(Localization.text("+%d Bulloni") % job.reward,21,UI.ORANGE))
 		var selected: bool = request.get("id","")==job.id
 		var items=HBoxContainer.new()
 		items.add_theme_constant_override("separation",16)
@@ -41,14 +41,14 @@ static func build(column: VBoxContainer, player: Node, active: bool) -> void:
 			var text: String = catalog.item_name(key.get_slice("_",0).to_int(),key.get_slice("_",1).to_int())+" ×%d" % job.items[key]
 			details.add_child(ART.label(text,16,UI.PAPER))
 			if selected:
-				details.add_child(ART.label("Sacca %d · Cassone %d · Deposito %d" % [request.bag.get(key,0),request.cargo.get(key,0),request.stock.get(key,0)],12,UI.MUTED))
+				details.add_child(ART.label(Localization.format_text("Sacca %d · Cassone %d · Deposito %d", [request.bag.get(key,0),request.cargo.get(key,0),request.stock.get(key,0)]),12,UI.MUTED))
 		var button = Button.new()
 		box.add_child(button)
 		if job.id in GameState.operations.get("specific_completed",[]):
 			button.text = "CONSEGNATA"
 			button.disabled = true
 		elif selected:
-			button.text = "CONSEGNA · %d Bulloni" % job.reward
+			button.text = Localization.text("CONSEGNA · %d Bulloni") % job.reward
 			button.disabled = not active or not service.ready()
 			if is_instance_valid(player):
 				button.pressed.connect(player._specific_action.bind("deliver",str(request.ticket)))
@@ -62,7 +62,7 @@ static func build(column: VBoxContainer, player: Node, active: bool) -> void:
 			box.add_child(cancel)
 		else:
 			var unlocked: bool = GameState.completed_orders.size()>=int(job.orders) and GameState.yard_level>=int(job.land)
-			button.text = "Accetta" if unlocked else "%d commesse" % job.orders + (" · Lotto %d" % job.land if int(job.land)>0 else "")
+			button.text = "Accetta" if unlocked else Localization.text("%d commesse") % job.orders + (Localization.text(" · Lotto %d") % job.land if int(job.land)>0 else "")
 			button.disabled = not active or not unlocked or not request.is_empty()
 			if is_instance_valid(player):
 				button.pressed.connect(player._specific_action.bind("accept",job.id))

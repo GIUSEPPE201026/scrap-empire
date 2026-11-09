@@ -29,6 +29,7 @@ func _process(delta: float) -> void:
 	refresh()
 
 func caption(value: String, at: Vector2, font_size: int=15, color: Color=UI.PAPER, width: float=-1) -> void:
+	value=Localization.text(value)
 	var font: Font=get_theme_default_font()
 	if width>0 and font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>width:
 		while not value.is_empty() and font.get_string_size(value+"…",HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>width: value=value.left(-1)
@@ -52,21 +53,32 @@ func _draw() -> void:
 	caption(str(GameState.team_credits),money.position+Vector2(48,30),23)
 	caption("BULLONI",money.position+Vector2(48,46),11,UI.MUTED)
 	var riding: bool=is_instance_valid(player._mounted_vehicle)
-	var driving: bool=riding and player._mounted_vehicle.level in [2,3]
+	var driving: bool=riding and player._mounted_vehicle.level in [2,3,4,5,6]
 	var goal=Rect2(Vector2(24,22),Vector2(352,82))
 	plate(goal)
 	caption(preload("res://scripts/gameplay/yard_clock.gd").caption(),goal.position+Vector2(12,21),12,UI.MUTED)
 	var objective: String=player._career_hud_step.get("title","Esplora Riva Secca")
-	if driving: objective="DUNE / "+player._region_name()
+	var goal_hint: String=Localization.text("[J] Diario" if player._shortcut_free(KEY_J) else "Pausa · Diario")+(Localization.text("    [M] Mappa") if player._shortcut_free(KEY_M) else "")
+	if player._vacuum_active: objective="ASPIRATORE · SCARTI LEGGERI"
+	if driving: objective="DUNE / "+Localization.text(player._region_name())
+	if driving and player._mounted_vehicle.vehicle_kind in ["crane","loader","forklift"]:
+		var kind: String=player._mounted_vehicle.vehicle_kind
+		var jobs=preload("res://scripts/economy/industrial_jobs.gd")
+		var progress: Dictionary=jobs.progress(kind)
+		if progress.active:
+			var job: Dictionary=jobs.tier(kind)
+			objective=Localization.text(job.name)
+			goal_hint=Localization.format_text("%d / %d · %s",[progress.units,job.goal,"H · SPEDISCI" if kind=="forklift" else "G · DEPOSITA"])
+			if int(progress.units)>=int(job.goal): goal_hint=Localization.text("RICOMPENSA PRONTA · GARAGE")
 	caption(objective,goal.position+Vector2(12,49),17,UI.PAPER,326)
-	caption(("[J] Diario" if player._shortcut_free(KEY_J) else "Pausa · Diario")+("    [M] Mappa" if player._shortcut_free(KEY_M) else ""),goal.position+Vector2(12,69),12,UI.ORANGE)
+	caption(goal_hint,goal.position+Vector2(12,69),12,UI.ORANGE,326)
 	if not player._navigation_label.is_empty():
 		preload("res://scripts/ui/navigation_marker.gd").draw_marker(self,player)
 		var route=Rect2(Vector2(24,112),Vector2(352,34))
 		plate(route)
 		var delta: Vector3=player.camera.global_basis.inverse()*(player._navigation_target-player.camera.global_position)
 		var arrow: String=("↑" if delta.z<0 else "↓") if absf(delta.x)<absf(delta.z)*0.5 else ("→" if delta.x>0 else "←")
-		caption(arrow+"  "+player._navigation_label+" · %.0f m" % player.global_position.distance_to(player._navigation_target),route.position+Vector2(10,22),13,UI.ORANGE,332)
+		caption(arrow+"  "+Localization.text(player._navigation_label)+" · %.0f m" % player.global_position.distance_to(player._navigation_target),route.position+Vector2(10,22),13,UI.ORANGE,332)
 	var bag=Rect2(Vector2(24,view.y-160),Vector2(248,132))
 	plate(bag)
 	picture("bag",bag.position+Vector2(8,6),Vector2(40,36))
@@ -90,7 +102,13 @@ func _draw() -> void:
 		caption("%02d" % roundi(absf(player._vehicle_speed)*3.6),speed.position+Vector2(14,48),40)
 		caption("KM/H",speed.position+Vector2(90,47),12,UI.MUTED)
 		var state: String="P · PARCHEGGIO" if player._vehicle_motion.parking_brake else ("DERAPATA" if player._vehicle_motion.drift_blend>0.4 else "SPAZIO · FRENO A MANO")
-		if player._mounted_vehicle.level==3 and not player._vehicle_motion.parking_brake: state="CROSS · SPAZIO SALTO"
+		if player._mounted_vehicle.level==3 and not player._vehicle_motion.parking_brake: state="CTRL · DERAPA | SPAZIO · SALTO"
+		if player._mounted_vehicle.level==4 and not player._vehicle_motion.parking_brake: state="G · PALLET | MOUSE · FORCHE"
+		if player._mounted_vehicle.level==4 and is_instance_valid(player._mounted_vehicle.carried): state="H · TERMINALE | G · POSA"
+		if player._mounted_vehicle.level in [5,6] and not player._vehicle_motion.parking_brake: state="G · CARICO | MOUSE · BRACCIO"
+		if player._mounted_vehicle.level==6 and player._mounted_vehicle.load_items.is_empty() and not player._vehicle_motion.parking_brake: state="H · MACERIE | G · CARICO"
+		if player._mounted_vehicle.level in [5,6] and player._mounted_vehicle.unload_ready: state="G · SCARICA NEL DEPOSITO"
+		if player._mounted_vehicle.level in [2,3] and is_instance_valid(player._towed_cart): state=Localization.text("CARRELLO · %.0f kg | H · SGANCIA") % GameState.crafting.cart_mass(player._towed_cart.craft_id)
 		caption(state,speed.position+Vector2(14,72),12,UI.ORANGE)
 		caption("[V] Visuale  ·  [E] Scendi",speed.position+Vector2(130,27),11,UI.MUTED)
 	else:

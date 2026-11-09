@@ -40,7 +40,7 @@ static func open(player: Node) -> void:
 			return
 		if ID.apply(name_field.text,choices[0].selected,choices[1].selected,ticket):
 			player._close_pause_menu()
-			player._notify("Insegna e livree aggiornate.")
+			player._notify(Localization.text("Insegna e livree aggiornate."))
 		else:
 			status.text="Nome non valido o salvataggio non riuscito. Riprova."
 	)

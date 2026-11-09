@@ -352,6 +352,11 @@ func _ready() -> void:
 	_field_ui.set_script(preload("res://scripts/ui/field_hud.gd"))
 	_field_ui.player=self
 	get_node("HUD").add_child(_field_ui)
+	Localization.language_changed.connect(_on_language_changed)
+	_update_inventory_hud()
+
+func _on_language_changed() -> void:
+	_career_hud_frame=-1000
 	_update_inventory_hud()
 
 func _on_inventory_changed(peer_id: int, _inventory: Dictionary) -> void:
@@ -363,14 +368,14 @@ func _update_inventory_hud() -> void:
 		return
 
 	if is_instance_valid(_panel_wallet):
-		_panel_wallet.text = "%d Bulloni" % _game_state.team_credits
+		_panel_wallet.text = Localization.text("%d Bulloni") % _game_state.team_credits
 	var inv = _game_state.player_inventories[owner_peer_id]
 	var mass = _game_state.get_inventory_mass(owner_peer_id)
 	var capacity = _game_state.get_inventory_capacity(owner_peer_id)
 	var driving_buggy: bool = is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level==2
 	_hotbar.visible = not driving_buggy
 	var interaction_key: String = InputMap.action_get_events("interact")[0].as_text()
-	_hotbar.text = "%s    [%s] INTERAGISCI" % ["[I] ATTREZZATURA" if _shortcut_free(KEY_I) else "PAUSA → ATTREZZATURA",interaction_key]
+	_hotbar.text = Localization.format_text("%s    [%s] INTERAGISCI", ["[I] ATTREZZATURA" if _shortcut_free(KEY_I) else "PAUSA → ATTREZZATURA",interaction_key])
 	_reticle.visible = not driving_buggy
 	for slot in _hotbar_slots:
 		slot.get_parent().visible = not driving_buggy
@@ -378,7 +383,7 @@ func _update_inventory_hud() -> void:
 	var equipped: int = 3 if is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level == 1 else (_active_tool()+1 if _active_tool()>=3 else _active_tool())
 	for index in _hotbar_slots.size():
 		var owned: bool = index == 0 or (index < 3 and _game_state.team_upgrade_levels.tool >= index) or (index == 3 and _game_state.vehicle_level >= 1) or (index>=4 and _game_state.owns_tool(index-1))
-		_hotbar_slots[index].text = "%s · %s\n%s" % [str(index+1) if _shortcut_free(KEY_1+index) else "—", tool_names[index], "IN USO" if index == equipped else ("PRONTO" if owned else "BLOCCATO")]
+		_hotbar_slots[index].text = Localization.format_text("%s · %s\n%s", [str(index+1) if _shortcut_free(KEY_1+index) else "—", tool_names[index], "IN USO" if index == equipped else ("PRONTO" if owned else "BLOCCATO")])
 		_hotbar_slots[index].modulate = Color("#ffda7d") if index == equipped else (Color.WHITE if owned else Color("#74838a"))
 	if _bag_meter:
 		_bag_meter.value = mass * 100.0 / capacity
@@ -457,7 +462,7 @@ func _try_deposit() -> void:
 	if not _near_depot():
 		return
 	var value: int = InventoryService.deposit_all(owner_peer_id)
-	_notify("Sacca trasferita: scorte conservate nel deposito." if value>0 else ("Deposito non confermato: materiali ancora nella sacca." if get_inventory_mass()>0 else "Sacca vuota."))
+	_notify(Localization.text("Sacca trasferita: scorte conservate nel deposito.") if value>0 else (Localization.text("Deposito non confermato: materiali ancora nella sacca.") if get_inventory_mass()>0 else Localization.text("Sacca vuota.")))
 	if value>0:
 		_play_feedback("deposit")
 	_refresh_station()
@@ -647,9 +652,9 @@ func _show_mission_summary(result: Dictionary) -> void:
 	vbox.add_child(sep)
 
 	var labels = [
-		["Valore vendita:", "%d Bulloni" % [result.sale_value], Color(0.7, 0.9, 0.7, 1)],
+		["Valore vendita:", Localization.format_text("%d Bulloni", [result.sale_value]), Color(0.7, 0.9, 0.7, 1)],
 		["Oggetti raccolti:", "%d / %d" % [result.clean_count, result.total_count], Color(0.7, 0.8, 1, 1)],
-		["Bonus contratto:", "%d Bulloni" % [result.bonus], Color(1, 0.85, 0.3, 1)],
+		["Bonus contratto:", Localization.format_text("%d Bulloni", [result.bonus]), Color(1, 0.85, 0.3, 1)],
 		["Contratto raggiunto:", "%s" % ["SÌ" if result.contract_met else "NO"], Color(0.3, 1, 0.5, 1) if result.contract_met else Color(1, 0.4, 0.4, 1)],
 	]
 
@@ -904,6 +909,11 @@ func set_single_player_mode(enabled: bool) -> void:
 		print('[PLAYER] Single player mode enabled')
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_local_player and not _is_paused and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode==KEY_H and not _gameplay_key(event) and is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level in [2,3] and is_instance_valid(_towed_cart):
+		if absf(_vehicle_speed)<=1.0: _stop_cart()
+		else: _notify(Localization.text("Fermati prima di sganciare il carrello."))
+		get_viewport().set_input_as_handled()
+		return
 	if not is_local_player or _is_paused:
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -912,7 +922,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if is_instance_valid(_placement):
 		_placement.handle_input(event)
 		return
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_V and not _gameplay_key(event) and is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level in [2,3]:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_V and not _gameplay_key(event) and is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level in [2,3,4,5,6]:
 		_toggle_vehicle_view()
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("pause"):
@@ -935,7 +945,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_cancel_collection()
 		if is_instance_valid(_target_scrap) and _target_scrap.is_in_group("salvage_assemblies"):
 			_target_scrap.recover_intact = _recover_intact
-		_notify("Modalità: recupera componente intero." if _recover_intact else "Modalità: separa materiali nella sacca.")
+		_notify(Localization.text("Modalità: recupera componente intero.") if _recover_intact else Localization.text("Modalità: separa materiali nella sacca."))
 		get_viewport().set_input_as_handled()
 	elif event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F and not _gameplay_key(event):
 		_scan_scrap(Input.is_key_pressed(KEY_SHIFT))
@@ -1003,7 +1013,7 @@ func _clear_navigation() -> void:
 		for atlas in _pause_menu.find_children("YardAtlas","Control",true,false): atlas.queue_redraw()
 		if _pause_menu.has_meta("clear_waypoint"):
 			_pause_menu.get_meta("clear_waypoint").disabled=true
-	_notify("Meta rimossa.")
+	_notify(Localization.text("Meta rimossa."))
 
 func _show_mission_status() -> void:
 	# Show mission status popup
@@ -1067,7 +1077,7 @@ func _show_settings() -> void:
 
 func _apply_local_settings() -> void:
 	var config = ConfigFile.new()
-	config.load("user://settings.cfg")
+	config.load(Localization.settings_path)
 	mouse_sensitivity = float(config.get_value("controls", "mouse_sensitivity", 0.002))
 	_invert_y = bool(config.get_value("controls", "invert_y", false))
 	if camera:
@@ -1144,12 +1154,28 @@ func _quit_to_menu() -> void:
 	confirm.popup_centered()
 
 func _do_quit_to_menu() -> void:
-	_stop_cart()
+	if is_instance_valid(_towed_cart) and is_instance_valid(_towed_cart.tow_vehicle):
+		if not _game_state.crafting.move_object(_towed_cart.craft_id,_towed_cart.global_position,_towed_cart.rotation.y): return
+	else: _stop_cart()
 	if not _save_progress():
 		return
 	_session._cleanup_and_return_to_menu()
 
 var _towed_cart: Node3D
+var _vacuum_active: bool=false
+var _vacuum_tool: Node3D
+
+func _toggle_vacuum() -> void:
+	if int(GameState.workshop_modules.get("vacuum",0))<1 or is_instance_valid(_mounted_vehicle): return
+	_vacuum_active=not _vacuum_active
+	_cancel_collection()
+	if not is_instance_valid(_vacuum_tool):
+		_vacuum_tool=preload("res://scripts/gameplay/vacuum_tool.gd").new()
+		_vacuum_tool.player=self
+		camera.add_child(_vacuum_tool)
+		_vacuum_tool.position=Vector3(0.35,-0.35,-0.65)
+	_close_pause_menu()
+	_notify(Localization.text("Aspiratore · tieni premuto raccogli sugli scarti leggeri") if _vacuum_active else Localization.text("Aspiratore riposto"))
 
 var _vehicle_support: CollisionShape3D
 var _drag_velocity: Vector3 = Vector3.ZERO
@@ -1192,6 +1218,9 @@ func _physics_process(delta: float) -> void:
 		_game_state.player_rotations[owner_peer_id] = look_rotation.y
 
 func _process_collection(delta: float) -> void:
+	if _vacuum_active:
+		_cancel_collection()
+		return
 	if _ignore_collect_until_release:
 		if Input.is_action_pressed("collect"): return
 		_ignore_collect_until_release=false
@@ -1228,6 +1257,8 @@ func _process_collection(delta: float) -> void:
 			hit_scrap.select_component(component)
 			hit_scrap.recover_intact = _recover_intact
 			hit_scrap.set_highlighted(true)
+		elif collider.is_in_group("landfill_piles") or collider.is_in_group("landfill_scenery"):
+			_world_hint = "Cerca un oggetto · raccogli o trascina i pezzi sporgenti"
 		elif collider.is_in_group("scrap") or collider.has_method("commit_stage"):
 			hit_scrap = collider
 			if collider.is_in_group("salvage_assemblies"):
@@ -1315,15 +1346,15 @@ func _complete_collection() -> void:
 			_play_feedback(material_id if material_id in ["metal","plastic","electronics"] else "metal")
 			_collection_fx(_target_scrap)
 			_target_scrap.collect()
-			_notify("Raccolto: " + {"metal":"metallo", "plastic":"plastica", "electronics":"elettronica", "copper":"rame", "aluminum":"alluminio", "glass":"vetro", "rubber":"gomma"}.get(material_id, material_id))
+			_notify(Localization.text("Raccolto: ") + {"metal":"metallo", "plastic":"plastica", "electronics":"elettronica", "copper":"rame", "aluminum":"alluminio", "glass":"vetro", "rubber":"gomma"}.get(material_id, material_id))
 			if requested:
-				_notify("Pezzo riservato alla richiesta: depositalo per consegnarlo.")
+				_notify(Localization.text("Pezzo riservato alla richiesta: depositalo per consegnarlo."))
 			_target_scrap = null
 			# Screen shake feedback
 			_apply_screen_shake(0.15, 0.2)
 		else:
 			# Inventario pieno - mostra messaggio
-			_notify("Sacca piena: torna al DEPOSITO." if not _game_state.can_add_to_inventory(owner_peer_id,material_id) else "Raccolta annullata: impossibile confermare o salvare il recupero.")
+			_notify(Localization.text("Sacca piena: torna al DEPOSITO.") if not _game_state.can_add_to_inventory(owner_peer_id,material_id) else Localization.text("Raccolta annullata: impossibile confermare o salvare il recupero."))
 
 	_collecting = false
 	_collect_progress = 0.0
@@ -1394,14 +1425,14 @@ func _process_local_input(_delta: float) -> void:
 		speed = float(_game_state.logistics_def.carry_walk_mps)*float(_game_state.get_upgrade_effect("movement"))
 	if is_instance_valid(_dragged):
 		speed = float(_game_state.logistics_def.get("drag_speed_mps",1.8))*_game_state.module_effect("harness")*_drag_mobility()*0.8
-	if is_instance_valid(_towed_cart):
+	if is_instance_valid(_towed_cart) and not is_instance_valid(_towed_cart.tow_vehicle):
 		speed = minf(speed,float(_game_state.logistics_def.crafting.handcart.tow_speed_mps))
 	rotation.y = look_rotation.y
 	camera.basis = Basis.from_euler(Vector3(look_rotation.x, 0, 0))
 	var direction: Vector3 = (transform.basis * Vector3(input_vec.x, 0, input_vec.y)).normalized()
 	velocity.x = direction.x * speed
 	velocity.z = direction.z * speed
-	if Input.is_action_just_pressed("jump") and is_on_floor() and not is_instance_valid(_towed_cart):
+	if Input.is_action_just_pressed("jump") and is_on_floor() and (not is_instance_valid(_towed_cart) or is_instance_valid(_towed_cart.tow_vehicle)):
 		velocity.y = jump_velocity * (0.6 if not _game_state.operations.held.is_empty() else 1.0)
 
 func _send_input_to_host() -> void:
@@ -1559,7 +1590,7 @@ func _near_depot() -> bool:
 	return sector != null and global_position.distance_to(sector.get_node("DepositZone").global_position) <= _game_state.player_interaction_m
 
 func _notify(message: String) -> void:
-	_feedback.text = message
+	_feedback.text = Localization.text(message)
 	_feedback_lifetime = 3.2
 
 func _update_hint() -> void:
@@ -1600,22 +1631,23 @@ func _update_hint() -> void:
 	if focus.has("anchor"):
 		anchor = focus.anchor
 	match focus.kind:
-		"dismount": prompt = "[%s] SCENDI" % key_text
-		"uncouple": prompt = "[%s] LASCIA CARRELLO · %.0f / 60 kg" % [key_text,_game_state.crafting.cart_mass(focus.node.craft_id)]
-		"crafted": prompt = "PREMI [%s] · %s" % [key_text,_game_state.crafting.definitions()[focus.node.kind].name.to_upper()]
-		"carry": prompt = "[%s] %s" % [key_text,"CARICA NEL CASSONE" if _near_cargo_bay()!=null else ("DEPOSITA COMPONENTE" if _at_parts_storage() else "APPOGGIA A TERRA")]
-		"bulk": prompt = "[%s] SOLLEVA · DESTRO TRASCINA\n%s" % [key_text,focus.node.display_name()]
-		"cargo": prompt = "PREMI [%s] · CASSONE\n%.0f / %d kg" % [key_text,_game_state.ops.cargo_mass(),_game_state.ops.cargo_capacity()]
+		"dismount": prompt = Localization.text("[%s] SCENDI") % key_text
+		"hitch": prompt=Localization.format_text("[%s] %s · CARRELLO",[key_text,Localization.text("SGANCIA" if focus.detach else Localization.text("COLLEGA"))])
+		"uncouple": prompt = Localization.format_text("[%s] LASCIA CARRELLO · %.0f / 60 kg", [key_text,_game_state.crafting.cart_mass(focus.node.craft_id)])
+		"crafted": prompt = Localization.format_text("PREMI [%s] · %s", [key_text,_game_state.crafting.definitions()[focus.node.kind].name.to_upper()])
+		"carry": prompt = "[%s] %s" % [key_text,Localization.text("CARICA NEL CASSONE") if _near_cargo_bay()!=null else (Localization.text("DEPOSITA COMPONENTE") if _at_parts_storage() else Localization.text("APPOGGIA A TERRA"))]
+		"bulk": prompt = Localization.format_text("[%s] SOLLEVA · DESTRO TRASCINA\n%s", [key_text,focus.node.display_name()])
+		"cargo": prompt = Localization.format_text("PREMI [%s] · CASSONE\n%.0f / %d kg", [key_text,_game_state.ops.cargo_mass(),_game_state.ops.cargo_capacity()])
 		"operation":
-			prompt = "PREMI [%s] · %s" % [key_text,{"identity":"INSEGNA · PERSONALIZZA","recovery":"BANCO RECUPERO","dispatch":"BANCHINA SPEDIZIONI","warehouse":"MAGAZZINO COMPONENTI","craft":"BANCO COSTRUZIONE","fabrication":"ASSEMBLAGGIO","customer":"CLIENTE · ORDINI","career":"DIARIO · RIVA SECCA"}[focus.service]]
+			prompt = Localization.format_text("PREMI [%s] · %s", [key_text,{"identity":Localization.text("INSEGNA · PERSONALIZZA"),"recovery":Localization.text("BANCO RECUPERO"),"dispatch":Localization.text("BANCHINA SPEDIZIONI"),"warehouse":Localization.text("MAGAZZINO COMPONENTI"),"craft":Localization.text("BANCO COSTRUZIONE"),"fabrication":"ASSEMBLAGGIO","customer":Localization.text("CLIENTE · ORDINI"),"career":Localization.text("DIARIO · RIVA SECCA")}[focus.service]])
 			if focus.service=="customer":
-				prompt = "PREMI [%s] · %s %s" % [key_text,"PARLA CON" if focus.node.get_meta("customer_active",true) else "POSTAZIONE",_game_state.crafting.customer(str(focus.node.get_meta("customer"))).name.get_slice(" · ",0).to_upper()]
-		"secret": prompt = "PREMI [%s] · OSSERVA\n%s" % [key_text,"CURIOSITÀ ARCHIVIATA" if focus.node.secret_id in _game_state.secrets_found else "OGGETTO INSOLITO"]
-		"field_depot": prompt = "PREMI [%s] · SCARICA\nDEPOSITO SATELLITE" % key_text
-		"vehicle": prompt = "PREMI [%s] · GUIDA\n%s" % [key_text,focus.node.motion_definition().name]
-		"terminal": prompt = "PREMI [%s] PER APRIRE\n%s" % [key_text,{"tools":"MONITOR · UPGRADE","vehicles":"GARAGE · VEICOLI","land":"PLANIMETRIA · ESPANSIONI","journal":"ALBUM DELLE CURIOSITÀ"}[focus.service]]
-		"press": prompt = "PREMI [%s] · PRESSA P-01" % key_text
-		"depot": prompt = "PREMI [%s] · BILANCIA\nScarica e vendi i materiali" % key_text
+				prompt = Localization.format_text("PREMI [%s] · %s %s", [key_text,Localization.text("PARLA CON") if focus.node.get_meta("customer_active",true) else Localization.text("POSTAZIONE"),_game_state.crafting.customer(str(focus.node.get_meta("customer"))).name.get_slice(" · ",0).to_upper()])
+		"secret": prompt = Localization.format_text("PREMI [%s] · OSSERVA\n%s", [key_text,Localization.text("CURIOSITÀ ARCHIVIATA") if focus.node.secret_id in _game_state.secrets_found else Localization.text("OGGETTO INSOLITO")])
+		"field_depot": prompt = Localization.text("PREMI [%s] · SCARICA\nDEPOSITO SATELLITE") % key_text
+		"vehicle": prompt = Localization.format_text("PREMI [%s] · GUIDA\n%s", [key_text,focus.node.motion_definition().name])
+		"terminal": prompt = Localization.format_text("PREMI [%s] PER APRIRE\n%s", [key_text,{"tools":Localization.text("MONITOR · UPGRADE"),"vehicles":Localization.text("GARAGE · VEICOLI"),"land":Localization.text("PLANIMETRIA · ESPANSIONI"),"journal":Localization.text("ALBUM DELLE CURIOSITÀ")}[focus.service]])
+		"press": prompt = Localization.text("PREMI [%s] · PRESSA P-01") % key_text
+		"depot": prompt = Localization.text("PREMI [%s] · BILANCIA\nScarica e vendi i materiali") % key_text
 	if focus.kind=="none" and is_instance_valid(_target_scrap):
 		anchor = _target_scrap.global_position + Vector3.UP * (2.3 if _target_scrap.is_in_group("salvage_assemblies") else 1.0)
 		if _target_scrap.is_in_group("salvage_assemblies"):
@@ -1623,27 +1655,27 @@ func _update_hint() -> void:
 		if _target_scrap.has_method("can_start_collection"):
 			anchor = _target_hit_world + Vector3.UP * 0.7
 		if _target_scrap.has_method("commit_stage"):
-			prompt = "TIENI SINISTRO\n" + _target_scrap.display_name()
-			if _target_scrap.is_in_group("landfill_piles") or _target_scrap.is_in_group("landfill_scenery"): prompt+="\nDESTRO · SPOSTA I FRAMMENTI"
+			prompt = Localization.text("TIENI SINISTRO\n") + _target_scrap.display_name()
+			if _target_scrap.is_in_group("landfill_piles") or _target_scrap.is_in_group("landfill_scenery"): prompt+=Localization.text("\nDESTRO · SPOSTA I FRAMMENTI")
 			if _target_scrap.is_in_group("salvage_assemblies"):
-				prompt += "\n[%s] CAMBIA RECUPERO" % InputMap.action_get_events("recovery_mode")[0].as_text()
+				prompt += Localization.text("\n[%s] CAMBIA RECUPERO") % InputMap.action_get_events("recovery_mode")[0].as_text()
 			if _target_scrap.has_method("can_start_collection") and not _target_scrap.can_start_collection():
 				prompt = _target_scrap.display_name()
 		else:
 			var id: String = _scrap_type_to_material_id(_target_scrap.scrap_type)
 			var definition: Dictionary = _game_state.material_defs[id]
 			var name_text: String = {"metal":"Metallo", "plastic":"Plastica", "electronics":"Elettronica", "copper":"Rame", "aluminum":"Alluminio", "glass":"Vetro", "rubber":"Gomma"}.get(id, id)
-			prompt = "TIENI SINISTRO · %s\n%s · %d kg / %d Bulloni%s" % [_target_scrap.display_name().to_upper(), name_text, definition.mass_kg, definition.credits, " · NASCOSTO" if _target_scrap.is_in_group("hidden_salvage") else ""]
+			prompt = Localization.format_text("TIENI SINISTRO · %s\n%s · %d kg / %d Bulloni%s", [_target_scrap.display_name().to_upper(), name_text, definition.mass_kg, definition.credits, Localization.text(" · NASCOSTO") if _target_scrap.is_in_group("hidden_salvage") else ""])
 			var request_key: String = "%d_%d" % [_target_scrap.scrap_type,preload("res://scripts/gameplay/scrap_catalog.gd").variant_for(_target_scrap.entity_id)]
 			if _game_state.specifics.needs(request_key):
-				prompt += "\nRICHIESTA · PEZZO RISERVATO AL DEPOSITO"
-	if is_instance_valid(_target_scrap) and not _is_paused and prompt.begins_with("TIENI SINISTRO"):
+				prompt += Localization.text("\nRICHIESTA · PEZZO RISERVATO AL DEPOSITO")
+	if is_instance_valid(_target_scrap) and not _is_paused and prompt.begins_with(Localization.text("TIENI SINISTRO")):
 		var requirement: String = _collection_requirement()
 		if not requirement.is_empty():
 			prompt = requirement
 	_interact_prompt.modulate = Color("#ffba7a") if is_instance_valid(_target_scrap) and not _collection_requirement().is_empty() else Color("#ffe4aa")
 	if is_instance_valid(_dragged):
-		prompt = "TRASCINA · %.0f kg\nRilascia destro per lasciare" % _drag_mass()
+		prompt = Localization.text("TRASCINA · %.0f kg\nRilascia destro per lasciare") % _drag_mass()
 		anchor = _dragged.global_position+Vector3.UP
 	_interact_prompt.pixel_size = 0.0018
 	_interact_prompt.font_size = 26
@@ -1673,7 +1705,7 @@ func _fit_world_prompt(anchor: Vector3) -> Vector3:
 
 func _open_panel(title_text: String) -> void:
 	if is_instance_valid(_placement): _placement.cancel()
-	_stop_cart()
+	if is_instance_valid(_towed_cart) and not is_instance_valid(_towed_cart.tow_vehicle): _stop_cart()
 	if is_instance_valid(_dragged):
 		_finish_drag()
 	_cancel_collection()
@@ -1709,7 +1741,7 @@ func _open_panel(title_text: String) -> void:
 	var heading = art.label(identity[0].to_upper(),25,Color("#e9e1ce"))
 	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(heading)
-	_panel_wallet = art.label("%d Bulloni" % _game_state.team_credits,18,Color("#edbc60"))
+	_panel_wallet = art.label(Localization.text("%d Bulloni") % _game_state.team_credits,18,Color("#edbc60"))
 	header.add_child(_panel_wallet)
 	var close_button = Button.new()
 	close_button.icon = art.SYMBOLS.icon("close")
@@ -1757,32 +1789,32 @@ func _sell_deposit() -> void:
 	if not _near_depot():
 		return
 	var revenue: int = EconomyService.sell_deposit()
-	_notify("Vendita: +%d Bulloni." % revenue if revenue > 0 else ("Vendita non confermata: scorte conservate." if _game_state.get_deposit_value()>0 else "Deposito vuoto: nessun accredito."))
+	_notify(Localization.text("Vendita: +%d Bulloni.") % revenue if revenue > 0 else (Localization.text("Vendita non confermata: scorte conservate.") if _game_state.get_deposit_value()>0 else Localization.text("Deposito vuoto: nessun accredito.")))
 	_refresh_station()
 
 func _buy_bag() -> void:
 	if not _near_depot() or _game_state.team_upgrade_levels.bag != 0:
 		return
 	if EconomyService.purchase_upgrade("bag"):
-		_notify("Acquistata sacca da 30 kg!")
+		_notify(Localization.text("Acquistata sacca da 30 kg!"))
 		_save_progress()
 	else:
-		_notify("Bulloni insufficienti.")
+		_notify(Localization.text("Bulloni insufficienti."))
 	_refresh_station()
 
 func _save_progress() -> bool:
 	var saved: bool = SaveService.save_checkpoint()
 	if not saved:
-		_notify("ERRORE salvataggio. Progressi in memoria: riprova prima di uscire.")
+		_notify(Localization.text("ERRORE salvataggio. Progressi in memoria: riprova prima di uscire."))
 	return saved
 
 func _new_expedition() -> void:
 	if _game_state.ops.cargo_mass()>0:
-		_notify("Scarica il cassone prima di rinnovare il settore: il carico resta al sicuro.")
+		_notify(Localization.text("Scarica il cassone prima di rinnovare il settore: il carico resta al sicuro."))
 		_refresh_station()
 		return
 	if get_inventory_mass() > 0:
-		_notify("Deposita la sacca prima di partire: non perderai materiali.")
+		_notify(Localization.text("Deposita la sacca prima di partire: non perderai materiali."))
 		_refresh_station()
 		return
 	if not _save_progress():
@@ -1790,7 +1822,7 @@ func _new_expedition() -> void:
 		return
 	_close_pause_menu()
 	if not _game_state.reset_for_new_mission("C01",true):
-		_notify("Carica o recupera i componenti prima di rinnovare il settore.")
+		_notify(Localization.text("Carica o recupera i componenti prima di rinnovare il settore."))
 		return
 	_session.transition_to(_session.ConnectionState.LOADING)
 	get_tree().reload_current_scene()
@@ -1812,12 +1844,12 @@ func _refresh_press() -> void:
 	var mass: int = units * int(_game_state.material_defs[definition.input_material].mass_kg)
 	var state: String = "IMPIANTO DA ACQUISTARE"
 	if _game_state.press_owned:
-		state = "PRONTA" if _game_state.press_remaining <= 0 else "LOTTO IN LAVORAZIONE · %.1f s rimanenti" % _game_state.press_remaining
+		state = "PRONTA" if _game_state.press_remaining <= 0 else Localization.text("LOTTO IN LAVORAZIONE · %.1f s rimanenti") % _game_state.press_remaining
 	_station_status.text = "%s\n\n%d metalli (%d kg)  →  1 balla\n%d Bulloni  ·  %.0f s\n\nMetalli: %d   ·   Balle: %d" % [state, units, mass, _game_state.get_bale_value(), _game_state.press_cycle_seconds(), _game_state.team_deposit_counts.metal, _game_state.press_bales]
 	_station_status.add_theme_font_size_override("font_size",22)
-	_station_buy.text = "Posseduta" if _game_state.press_owned else "Acquista · %d Bulloni" % definition.cost
+	_station_buy.text = "Posseduta" if _game_state.press_owned else Localization.text("Acquista · %d Bulloni") % definition.cost
 	_station_buy.disabled = _game_state.press_owned or _game_state.team_credits < int(definition.cost)
-	_press_start_button.text = "LAVORA %d METALLI → 1 BALLA" % units
+	_press_start_button.text = Localization.text("LAVORA %d METALLI → 1 BALLA") % units
 	_press_start_button.disabled = not _game_state.press_owned or _game_state.press_remaining > 0 or _game_state.team_deposit_counts.metal < units
 	preload("res://scripts/ui/press_panel.gd").refresh(self)
 
@@ -1855,7 +1887,7 @@ func _buy_development(category: String) -> void:
 		else:
 			if category == "tool":
 				_equipped_tool = int(_game_state.team_upgrade_levels.tool)
-			_notify("Sbloccato: %s · tasto %d" % [_game_state.tool_defs[_active_tool()].name, _active_tool() + 1] if category == "tool" else "Dotazione acquistata e salvata.")
+			_notify(Localization.format_text("Sbloccato: %s · tasto %d", [_game_state.tool_defs[_active_tool()].name, _active_tool() + 1]) if category == "tool" else Localization.text("Dotazione acquistata e salvata."))
 	_open_development()
 
 func _buy_land() -> void:
@@ -1864,9 +1896,9 @@ func _buy_land() -> void:
 			var index: int = _game_state.yard_level - 1
 			_navigation_target = preload("res://scripts/gameplay/expansion_lots.gd").CENTERS[index] + Vector3(-34, 0, 25)
 			_navigation_label = "LOTTO EST" if index == 0 else "LOTTO DELLE DUNE"
-			_notify("Lotto aperto subito. Segui l'itinerario dal varco Est: risorse e scarico satellite sono pronti.")
+			_notify(Localization.text("Lotto aperto subito. Segui l'itinerario dal varco Est: risorse e scarico satellite sono pronti."))
 		else:
-			_notify(_game_state.land_requirement_message() if not _game_state.land_requirement_message().is_empty() else "Salvataggio non riuscito: progetto non addebitato.")
+			_notify(_game_state.land_requirement_message() if not _game_state.land_requirement_message().is_empty() else Localization.text("Salvataggio non riuscito: progetto non addebitato."))
 	_open_land()
 
 func _near_garage() -> bool:
@@ -1889,12 +1921,12 @@ func _sell_one(material_id: String, source: String) -> void:
 			_game_state.deserialize(snapshot)
 			_game_state.player_inventories[owner_peer_id] = inventory_before
 		else:
-			_notify("Venduta 1 unità: +%d Bulloni." % value)
+			_notify(Localization.text("Venduta 1 unità: +%d Bulloni.") % value)
 	_open_cargo()
 
 func _open_vehicle_shop() -> void:
-	if _vehicle_selection in [2,3]:
-		preload("res://scripts/ui/extra_vehicle_panel.gd").open(self,"skateboard" if _vehicle_selection==2 else "dirtbike")
+	if _vehicle_selection in [2,3,4,5,6]:
+		preload("res://scripts/ui/extra_vehicle_panel.gd").open(self,["skateboard","dirtbike","forklift","crane","loader"][_vehicle_selection-2])
 		return
 	_close_pause_menu()
 	_open_panel("GARAGE / PARCO MEZZI")
@@ -1908,17 +1940,18 @@ func _open_vehicle_shop() -> void:
 	navigation.add_theme_constant_override("separation", 14)
 	layout.add_child(navigation)
 	navigation.add_child(art.label("CATALOGO MEZZI", 13, Color("#8faeae")))
-	for index in 4:
+	for index in 7:
 		var tile = Button.new()
-		tile.text = ["Monopattino","Buggy","Skateboard","Moto da cross"][index] + ("  ✓" if _game_state.vehicle_level > index else "")
+		tile.text = ["Monopattino","Buggy","Skateboard","Moto da cross","Muletto","Gru magnetica","Minipala"][index]
 		tile.pressed.connect(_select_vehicle.bind(index))
-		tile.icon = art.SYMBOLS.icon(["scooter","truck","skateboard","dirtbike"][index])
-		art.button_style(tile, index == selection)
+		tile.icon = art.SYMBOLS.icon(["scooter","truck","skateboard","dirtbike","forklift","crane","loader"][index])
+		preload("res://scripts/ui/salvage_ui.gd").action(tile,tile.text,index==selection)
 		navigation.add_child(tile)
 	var details = VBoxContainer.new()
 	details.custom_minimum_size.x = 510
 	var personalize=Button.new()
 	personalize.text="Insegna e colori"
+	personalize.icon=art.SYMBOLS.icon("tools")
 	personalize.pressed.connect(_open_personalization)
 	art.button_style(personalize)
 	navigation.add_child(personalize)
@@ -1971,7 +2004,7 @@ func _buy_vehicle() -> void:
 		return
 	if _game_state.purchase_vehicle():
 		get_tree().get_first_node_in_group("sector").spawn_owned_vehicles()
-		_notify("Monopattino acquistato: premi 4 per equipaggiarlo." if _game_state.vehicle_level == 1 else "Buggy acquistato: ritiralo nel parcheggio del garage.")
+		_notify(Localization.text("Monopattino acquistato: premi 4 per equipaggiarlo.") if _game_state.vehicle_level == 1 else Localization.text("Buggy acquistato: ritiralo nel parcheggio del garage."))
 	_open_vehicle_shop()
 
 func _aims_at(point: Vector3, radius: float, exclude: Array = []) -> bool:
@@ -1994,21 +2027,30 @@ func _nearest_vehicle() -> Node3D:
 	return null
 
 func _mount_vehicle(vehicle: Node3D) -> bool:
-	_stop_cart()
+	_vacuum_active=false
 	if not _game_state.operations.held.is_empty():
-		_notify("Carica o deposita il componente prima di guidare.")
+		_notify(Localization.text("Carica o deposita il componente prima di guidare."))
 		return false
 	if is_instance_valid(_dragged):
 		_finish_drag()
 	if is_instance_valid(_mounted_vehicle) or vehicle == null or not vehicle.available() or global_position.distance_to(vehicle.global_position) > 3.0:
 		return false
+	if is_instance_valid(_towed_cart):
+		if is_instance_valid(_towed_cart.tow_vehicle) and _towed_cart.tow_vehicle!=vehicle:
+			_notify(Localization.text("Sgancia prima il carrello dal mezzo collegato."))
+			return false
+		if not is_instance_valid(_towed_cart.tow_vehicle):
+			if preload("res://scripts/gameplay/cart_hitch.gd").supported(vehicle):
+				if not _game_state.crafting.set_hitch(_towed_cart.craft_id,vehicle.vehicle_kind,_towed_cart.global_position,_towed_cart.rotation.y): return false
+				preload("res://scripts/gameplay/cart_hitch.gd").bind(self,_towed_cart,vehicle)
+			else: _stop_cart()
 	_cancel_collection()
 	if is_instance_valid(_target_scrap):
 		_target_scrap.set_highlighted(false)
 	_target_scrap = null
 	_vehicle_entry_side=signf(vehicle.to_local(global_position).x)
 	if _vehicle_entry_side==0: _vehicle_entry_side=1.0
-	_vehicle_entry_time=0.24 if vehicle.level==2 else 0.0
+	_vehicle_entry_time=0.24 if vehicle.level in [2,3,4,5,6] else 0.0
 	_vehicle_exit_time=0.0
 	_mounted_vehicle = vehicle
 	if is_instance_valid(_local_avatar): _local_avatar.hide()
@@ -2025,7 +2067,7 @@ func _mount_vehicle(vehicle: Node3D) -> bool:
 	camera.cull_mask &= ~(1 << 19)
 	floor_snap_length = 0.65
 	floor_constant_speed = false
-	if vehicle.level == 2:
+	if vehicle.level in [2,4,5,6]:
 		var chassis_shape = BoxShape3D.new()
 		chassis_shape.size = Vector3(1.65, 0.8, 2.65)
 		collision.shape = chassis_shape
@@ -2044,21 +2086,29 @@ func _mount_vehicle(vehicle: Node3D) -> bool:
 	vehicle.animate_entry(_vehicle_entry_side)
 	_vehicle_third_person = false
 	_update_vehicle_camera()
-	if vehicle.level==3:
-		_notify("Moto da cross · W/S gas e freno · A/D sterzo · Spazio salto · V visuale · E scendi.")
+	if vehicle.vehicle_kind in ["crane","loader"]:
+		_notify(Localization.text("G prende/rilascia · sinistro alza · destro abbassa · P parcheggio · V visuale"))
+	elif vehicle.vehicle_kind=="forklift":
+		_notify(Localization.text("Muletto · G aggancia/rilascia · sinistro/destro alza/abbassa · P parcheggio · V visuale."))
+	elif vehicle.level==3:
+		_notify(Localization.text("Moto da cross · W/S gas e freno · A/D sterzo · Spazio salto · V visuale · E scendi."))
 	else:
-		_notify("W/S accelera e frena · A/D sterza · Spazio salta · 4 riponi." if vehicle.level == 1 else "W/S accelera e frena · A/D sterza · E scendi · V visuale · Spazio + sterzo: derapa.")
+		_notify(Localization.text("W/S accelera e frena · A/D sterza · Spazio salta · 4 riponi.") if vehicle.level == 1 else Localization.text("W/S accelera e frena · A/D sterza · E scendi · V visuale · Spazio + sterzo: derapa."))
 	return true
 
 func _dismount_vehicle() -> void:
 	if not is_instance_valid(_mounted_vehicle):
 		return
+	if is_instance_valid(_towed_cart) and not is_instance_valid(_towed_cart.tow_vehicle): _stop_cart()
 	var vehicle = _mounted_vehicle
+	if vehicle.has_method("release_load") and not vehicle.release_load(self):
+		_notify(Localization.text("Abbassa il carico in uno spazio libero prima di scendere."))
+		return
 	var previous_view: Transform3D=camera.global_transform
 	var exit_position: Vector3 = global_position
-	if vehicle.level in [2,3]:
+	if vehicle.level in [2,3,4,5,6]:
 		if not is_on_floor():
-			_notify("Attendi di toccare terra prima di scendere.")
+			_notify(Localization.text("Attendi di toccare terra prima di scendere."))
 			return
 		var found: bool = false
 		for offset in [Vector3(2,0,0), Vector3(-2,0,0), Vector3(0,0,2.5), Vector3(0,0,-2.5)]:
@@ -2076,7 +2126,7 @@ func _dismount_vehicle() -> void:
 				found = true
 				break
 		if not found:
-			_notify("Spazio di uscita occupato. Sposta il buggy.")
+			_notify(Localization.text("Spazio di uscita occupato. Sposta il buggy."))
 			return
 	vehicle.global_position = global_position + Vector3.UP * vehicle.visual.position.y
 	vehicle.rotation.y = _vehicle_heading
@@ -2093,7 +2143,7 @@ func _dismount_vehicle() -> void:
 	floor_snap_length = _walking_snap
 	camera.cull_mask = _walking_camera_mask
 	vehicle.set_parked(true)
-	if vehicle.level==2: vehicle.animate_exit(exit_position)
+	if vehicle.level in [2,3,4,5,6]: vehicle.animate_exit(exit_position)
 	_mounted_vehicle = null
 	if is_instance_valid(_local_avatar): _local_avatar.show()
 	_vehicle_third_person = false
@@ -2103,14 +2153,14 @@ func _dismount_vehicle() -> void:
 	if vehicle.level == 1:
 		vehicle.hide()
 		vehicle.body.collision_layer = 0
-		_notify("Monopattino riposto. Puoi raccogliere.")
+		_notify(Localization.text("Monopattino riposto. Puoi raccogliere."))
 	else:
 		global_position = exit_position
 	camera.position = Vector3(0, 1.6, 0)
 	camera.basis = Basis.from_euler(Vector3(look_rotation.x, 0, 0))
 	look_rotation.y = rotation.y
 	_vehicle_entry_time=0.0
-	if vehicle.level==2:
+	if vehicle.level in [2,3,4,5,6]:
 		_vehicle_exit_from=global_transform.affine_inverse()*previous_view
 		_vehicle_exit_time=0.32
 		camera.transform=_vehicle_exit_from
@@ -2125,7 +2175,7 @@ func _animate_vehicle_exit(delta: float) -> void:
 func _drive_vehicle(delta: float) -> void:
 	_vehicle_entry_time=maxf(0.0,_vehicle_entry_time-delta)
 	var previous_heading: float = _vehicle_heading
-	_vehicle_motion.step(self, _mounted_vehicle, Input.get_axis("move_back", "move_forward"), Input.get_axis("move_left", "move_right"), (Input.is_action_pressed("jump") if _mounted_vehicle.level==2 else Input.is_action_just_pressed("jump")), delta)
+	_vehicle_motion.step(self, _mounted_vehicle, Input.get_axis("move_back", "move_forward"), Input.get_axis("move_left", "move_right"), (Input.is_action_pressed("jump") if _mounted_vehicle.level==2 else Input.is_action_just_pressed("jump")), delta, _mounted_vehicle.level==3 and Input.is_action_pressed("vehicle_drift"))
 	_vehicle_heading = _vehicle_motion.heading
 	look_rotation.y += wrapf(_vehicle_heading-previous_heading,-PI,PI)
 	_vehicle_speed = _vehicle_motion.speed
@@ -2195,8 +2245,9 @@ func _active_tool() -> int:
 	return _equipped_tool if _game_state.owns_tool(_equipped_tool) else 0
 
 func _equip_tool(level: int) -> void:
+	_vacuum_active=false
 	if not _game_state.owns_tool(level):
-		_notify("Acquista l'attrezzo al monitor della casa ufficio.")
+		_notify(Localization.text("Acquista l'attrezzo al monitor della casa ufficio."))
 		return
 	if is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level == 1:
 		_dismount_vehicle()
@@ -2204,7 +2255,7 @@ func _equip_tool(level: int) -> void:
 	_equipped_tool = level
 	if _is_paused:
 		_close_pause_menu()
-	_notify("Equipaggiato: " + _game_state.tool_defs[level].name)
+	_notify(Localization.text("Equipaggiato: ") + _game_state.tool_defs[level].name)
 
 func _choose_portable(kind: String) -> void:
 	if is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level!=1: return
@@ -2216,10 +2267,10 @@ func _toggle_scooter(kind: String="") -> void:
 	if kind.is_empty(): kind=str(_game_state.operations.get("mobility",{}).get("portable","scooter"))
 	if kind not in ["scooter","skateboard"]: return
 	if not _game_state.operations.held.is_empty():
-		_notify("Deposita il componente prima di equipaggiare il monopattino.")
+		_notify(Localization.text("Deposita il componente prima di equipaggiare il monopattino."))
 		return
 	if (_game_state.vehicle_level<1 and kind=="scooter") or (kind=="skateboard" and not preload("res://scripts/economy/extra_mobility.gd").owned(kind)):
-		_notify("Acquista prima il monopattino al garage.")
+		_notify(Localization.text("Acquista prima il monopattino al garage."))
 		return
 	if _is_paused:
 		_close_pause_menu()
@@ -2227,7 +2278,7 @@ func _toggle_scooter(kind: String="") -> void:
 		if _mounted_vehicle.level == 1:
 			_dismount_vehicle()
 		else:
-			_notify("Scendi dal mezzo prima di equipaggiare il portatile.")
+			_notify(Localization.text("Scendi dal mezzo prima di equipaggiare il portatile."))
 		return
 	var scooter: Node3D
 	for vehicle in get_tree().get_nodes_in_group("yard_vehicles"):
@@ -2238,7 +2289,7 @@ func _toggle_scooter(kind: String="") -> void:
 	var ground = PhysicsRayQueryParameters3D.create(global_position + Vector3.UP * 0.5, global_position - Vector3.UP, 1, [get_rid(), scooter.body.get_rid()])
 	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(ground)
 	if hit.is_empty() or hit.normal.y < 0.75:
-		_notify("Tocca terra prima di equipaggiare il monopattino.")
+		_notify(Localization.text("Tocca terra prima di equipaggiare il monopattino."))
 		return
 	var clearance = PhysicsShapeQueryParameters3D.new()
 	clearance.shape = BoxShape3D.new()
@@ -2246,14 +2297,14 @@ func _toggle_scooter(kind: String="") -> void:
 	clearance.transform = Transform3D(Basis(Vector3.UP, look_rotation.y), global_position + Vector3(0, 0.7, 0))
 	clearance.exclude = [get_rid(), scooter.body.get_rid()]
 	if not get_world_3d().direct_space_state.intersect_shape(clearance).is_empty():
-		_notify("Qui manca spazio per il monopattino: spostati un poco.")
+		_notify(Localization.text("Qui manca spazio per il monopattino: spostati un poco."))
 		return
 	scooter.global_position = global_position
 	scooter.rotation.y = look_rotation.y
 	scooter.show()
 	scooter.set_parked(true)
 	if _mount_vehicle(scooter):
-		_notify("Mezzo portatile equipaggiato · 4 per riporlo · 1–3 per tornare agli attrezzi.")
+		_notify(Localization.text("Mezzo portatile equipaggiato · 4 per riporlo · 1–3 per tornare agli attrezzi."))
 	else:
 		scooter.hide()
 		scooter.body.collision_layer = 0
@@ -2290,7 +2341,7 @@ func _animate_equipment(delta: float) -> void:
 			for side in [-1,1]:
 				art.beam(_held_tool,Vector3(side*0.08,-0.03,0),Vector3(0,0.32,-0.07),0.04,art.MINT)
 				art.beam(_held_tool,Vector3(0,0.32,-0.07),Vector3(side*0.05,0.45,-0.08),0.05,art.STEEL)
-	_held_tool.visible = not _is_paused and not is_instance_valid(_mounted_vehicle) and _game_state.operations.held.is_empty()
+	_held_tool.visible = not _vacuum_active and not _is_paused and not is_instance_valid(_mounted_vehicle) and _game_state.operations.held.is_empty()
 	var swing: float = sin(_action_clock * 16) if _collecting else sin(_action_clock * 2) * 0.08
 	_held_tool.position = Vector3(0.33, (-0.44 if _tool_visual_level == 0 and not _collecting else -0.36) + swing * 0.025, -0.65 - absf(swing) * 0.05)
 	_held_tool.rotation = Vector3(swing * 0.2, 0.05, swing * 0.12)
@@ -2318,7 +2369,7 @@ func _track_location(location: Vector3, label_text: String) -> void:
 	_navigation_target = location
 	_navigation_label = label_text
 	_close_pause_menu()
-	_notify("Itinerario selezionato: " + label_text + ". Segui l’indicatore sul navigatore.")
+	_notify(Localization.text("Itinerario selezionato: ") + label_text + Localization.text(". Segui l’indicatore sul navigatore."))
 
 func _near_field_depot() -> Node3D:
 	for node in get_tree().get_nodes_in_group("field_depot"):
@@ -2331,7 +2382,7 @@ func _open_field_depot() -> void:
 		return
 	_close_pause_menu()
 	_open_panel("SCARICO SATELLITE")
-	_panel_metrics([["SACCA", "%.0f kg" % get_inventory_mass()], ["SCORTE", "%d Bulloni" % _game_state.get_deposit_value()], ["DESTINAZIONE", "Base"]])
+	_panel_metrics([["SACCA", "%.0f kg" % get_inventory_mass()], ["SCORTE", Localization.text("%d Bulloni") % _game_state.get_deposit_value()], ["DESTINAZIONE", "Base"]])
 	_panel_text("Scarico · nessuna vendita", "I materiali arrivano al deposito centrale. Vendi alla bilancia della base.")
 	_add_panel_button("TRASFERISCI TUTTA LA SACCA", _deposit_field).disabled = get_inventory_mass() <= 0
 	_add_panel_button("TORNA AL RECUPERO", _close_pause_menu)
@@ -2348,7 +2399,7 @@ func _deposit_field() -> void:
 			_game_state.deserialize(snapshot)
 			_game_state.player_inventories[owner_peer_id] = inventory_before
 		else:
-			_notify("Materiali al deposito centrale. Vendili alla bilancia quando rientri.")
+			_notify(Localization.text("Materiali al deposito centrale. Vendili alla bilancia quando rientri."))
 	_open_field_depot()
 
 func _near_secret() -> Node3D:
@@ -2366,7 +2417,7 @@ func _discover_nearest() -> void:
 	if secret == null:
 		return
 	if secret.secret_id not in _game_state.secrets_found and not secret.discover():
-		_notify("Impossibile salvare la scoperta: riprova prima di allontanarti.")
+		_notify(Localization.text("Impossibile salvare la scoperta: riprova prima di allontanarti."))
 		return
 	_open_journal()
 
@@ -2388,7 +2439,7 @@ func _region_name() -> String:
 	return "DISCARICA" if maxf(absf(position.x), absf(position.z)) < 80 else "DUNE ESTERNE"
 func _collection_requirement() -> String:
 	if not _game_state.operations.held.is_empty():
-		return "MANI OCCUPATE\nCarica o deposita il componente."
+		return Localization.text("MANI OCCUPATE\nCarica o deposita il componente.")
 	if is_instance_valid(_target_scrap) and _target_scrap.is_in_group("salvage_assemblies"):
 		return _target_scrap.requirement(owner_peer_id,_active_tool())
 	if not is_instance_valid(_target_scrap):
@@ -2412,12 +2463,12 @@ func _collection_requirement() -> String:
 	if _active_tool() not in allowed:
 		var descriptions: PackedStringArray = []
 		for tool in allowed:
-			descriptions.append("%s [%d]" % [_game_state.tool_defs[int(tool)].name, int(_game_state.tool_defs[int(tool)].key)])
-		return "STRUMENTO NECESSARIO\n" + " / ".join(descriptions)
+			descriptions.append(Localization.format_text("%s [%d]", [_game_state.tool_defs[int(tool)].name, int(_game_state.tool_defs[int(tool)].key)]))
+		return Localization.text("STRUMENTO NECESSARIO\n") + " / ".join(descriptions)
 	if int(step.get("land", 0)) > _game_state.yard_level:
-		return "PROGETTO NECESSARIO\nApri il Lotto Est alla planimetria."
+		return Localization.text("PROGETTO NECESSARIO\nApri il Lotto Est alla planimetria.")
 	if get_inventory_mass() + required_mass > _game_state.get_inventory_capacity(owner_peer_id):
-		return "SACCA PIENA\nServono %.0f kg liberi per questo recupero." % required_mass
+		return Localization.text("SACCA PIENA\nServono %.0f kg liberi per questo recupero.") % required_mass
 	return ""
 
 func _land_project_text(land: Dictionary) -> String:
@@ -2430,7 +2481,7 @@ func _complete_work_order(id: String) -> void:
 	if not _near_garage():
 		return
 	if not _game_state.complete_order(id):
-		_notify("Consegna non riuscita: controlla materiali e salvataggio.")
+		_notify(Localization.text("Consegna non riuscita: controlla materiali e salvataggio."))
 	_open_development()
 	if is_instance_valid(_upgrade_monitor):
 		_upgrade_monitor.active_page = "orders"
@@ -2497,18 +2548,18 @@ func _buggy_at_storage() -> bool:
 func _interact_carried() -> void:
 	if _near_cargo_bay() != null:
 		if not _game_state.ops.load_held():
-			_notify("Cassone pieno: scarica o amplia la capacità.")
+			_notify(Localization.text("Cassone pieno: scarica o amplia la capacità."))
 		else:
-			_notify("Componente caricato nel buggy · %.0f / %d kg." % [_game_state.ops.cargo_mass(),_game_state.ops.cargo_capacity()])
+			_notify(Localization.format_text("Componente caricato nel buggy · %.0f / %d kg.", [_game_state.ops.cargo_mass(),_game_state.ops.cargo_capacity()]))
 	elif _at_parts_storage():
 		if _game_state.ops.store_held():
-			_notify("Componente depositato nel magazzino.")
+			_notify(Localization.text("Componente depositato nel magazzino."))
 	else:
 		var desired: Vector3 = global_position-global_basis.z*1.4
 		var query = PhysicsRayQueryParameters3D.create(desired+Vector3.UP*2,desired-Vector3.UP*4,1,[get_rid()])
 		var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(query)
 		if hit.is_empty() or hit.normal.y < 0.65:
-			_notify("Cerca un punto libero e stabile per appoggiare il componente.")
+			_notify(Localization.text("Cerca un punto libero e stabile per appoggiare il componente."))
 			return
 		var space = PhysicsShapeQueryParameters3D.new()
 		space.shape = BoxShape3D.new()
@@ -2516,7 +2567,7 @@ func _interact_carried() -> void:
 		space.transform = Transform3D(Basis.IDENTITY,hit.position+Vector3.UP*0.42)
 		space.exclude = [get_rid()]
 		if not get_world_3d().direct_space_state.intersect_shape(space).is_empty():
-			_notify("Spazio occupato: spostati prima di appoggiare il componente.")
+			_notify(Localization.text("Spazio occupato: spostati prima di appoggiare il componente."))
 			return
 		_game_state.ops.drop_part(hit.position+Vector3.UP*0.02)
 
@@ -2590,9 +2641,9 @@ func _ops_action(action: String, id: String = "", count: int = 0) -> void:
 						best = global_position.distance_to(node.global_position)
 				if is_finite(best):
 					_close_pause_menu()
-					_notify("Recupero indicato sul navigatore.")
+					_notify(Localization.text("Recupero indicato sul navigatore."))
 				else:
-					_notify("Recupera i componenti smontando auto e macchinari.")
+					_notify(Localization.text("Recupera i componenti smontando auto e macchinari."))
 			return
 		"cancel_delivery":
 			if _near_garage() or _near_ops_service() == "dispatch":
@@ -2638,10 +2689,10 @@ func _ops_action(action: String, id: String = "", count: int = 0) -> void:
 			if _near_garage() or _near_ops_service() == "dispatch":
 				success = _game_state.ops.complete_delivery(count)
 	if success:
-		_notify("Operazione completata e salvata.")
+		_notify(Localization.text("Operazione completata e salvata."))
 		_close_pause_menu()
 	else:
-		_notify("Operazione non disponibile: controlla spazio, posizione e requisiti.")
+		_notify(Localization.text("Operazione non disponibile: controlla spazio, posizione e requisiti."))
 
 # Loose bulky parts can be pulled along the ground; inventory stays untouched.
 func _process_drag(delta: float) -> void:
@@ -2725,7 +2776,7 @@ func _finish_drag() -> void:
 		_game_state.operations = before
 		_dragged.global_position = _drag_origin
 		_dragged.rotation.y = _drag_original_yaw
-		_notify("Spostamento annullato: salvataggio non riuscito.")
+		_notify(Localization.text("Spostamento annullato: salvataggio non riuscito."))
 	_dragged = null
 	_drag_velocity = Vector3.ZERO
 	if is_instance_valid(_drag_tether):
@@ -2876,23 +2927,23 @@ func _update_work_light() -> void:
 	_work_light.visible = _work_light_enabled
 
 func _toggle_work_light() -> void:
-	if is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level in [2,3]:
+	if is_instance_valid(_mounted_vehicle) and _mounted_vehicle.level in [2,3,4,5,6]:
 		_mounted_vehicle.toggle_headlights()
 		_close_pause_menu()
-		_notify("Fari accesi." if _mounted_vehicle.headlights_enabled else "Fari spenti.")
+		_notify(Localization.text("Fari accesi.") if _mounted_vehicle.headlights_enabled else Localization.text("Fari spenti."))
 		return
 	if int(_game_state.workshop_modules.get("headlamp",0))==0:
-		_notify("Installa la lampada al monitor → Officina.")
+		_notify(Localization.text("Installa la lampada al monitor → Officina."))
 		return
 	_work_light_enabled = not _work_light_enabled
 	_update_work_light()
 	_close_pause_menu()
-	_notify("Lampada accesa." if _work_light_enabled else "Lampada spenta.")
+	_notify(Localization.text("Lampada accesa.") if _work_light_enabled else Localization.text("Lampada spenta."))
 
 func _scan_scrap(collection_only: bool = false) -> void:
 	_career_tracking = false
 	if int(_game_state.workshop_modules.get("scanner",0))==0:
-		_notify("Installa lo scanner al monitor → Officina.")
+		_notify(Localization.text("Installa lo scanner al monitor → Officina."))
 		return
 	var range_m: float = _game_state.module_effect("scanner") * (1.25 if _game_state.story.has_project("archive") else 1.0)
 	if not collection_only and _scan_specific_request(range_m):
@@ -2913,11 +2964,11 @@ func _scan_scrap(collection_only: bool = false) -> void:
 	if nearest == null:
 		if _navigation_label.begins_with("SCANNER"):
 			_navigation_label = ""
-		_notify("Nessuna nuova voce del libro entro %d m. Esplora un'altra zona." % range_m)
+		_notify(Localization.text("Nessuna nuova voce del libro entro %d m. Esplora un'altra zona.") % range_m)
 		return
 	_navigation_target = nearest.global_position
 	_navigation_label = "SCANNER · "+nearest.display_name()
-	_notify("Segnale trovato: %s · %.0f m." % [nearest.display_name(),best])
+	_notify(Localization.format_text("Segnale trovato: %s · %.0f m.", [nearest.display_name(),best]))
 
 func _gameplay_key(event: InputEvent) -> bool:
 	for action in ["move_forward","move_back","move_left","move_right","jump","sprint","interact","recovery_mode"]:
@@ -2959,24 +3010,24 @@ func _scan_delivery_parts(range_m: float) -> bool:
 	if nearest == null:
 		if _navigation_label.begins_with("SCANNER"):
 			_navigation_label = ""
-		_notify("Fornitura: componenti mancanti fuori portata (%d m). Maiusc+F cerca il libro." % range_m)
+		_notify(Localization.text("Fornitura: componenti mancanti fuori portata (%d m). Maiusc+F cerca il libro.") % range_m)
 		return true
 	_navigation_target = nearest.global_position
 	_navigation_label = "SCANNER · FORNITURA · "+_game_state.part_defs[nearest.kind].name
-	_notify("Fornitura: %s · %.0f m%s" % [_game_state.part_defs[nearest.kind].name,best," · da riparare al Lotto Est" if nearest.quality==0 else ""])
+	_notify(Localization.format_text("Fornitura: %s · %.0f m%s", [_game_state.part_defs[nearest.kind].name,best,Localization.text(" · da riparare al Lotto Est") if nearest.quality==0 else ""]))
 	return true
 
 func _toggle_parking_brake() -> void:
-	if not is_instance_valid(_mounted_vehicle) or _mounted_vehicle.level not in [2,3]:
-		_notify("Usa il parcheggio alla guida di un mezzo a motore.")
+	if not is_instance_valid(_mounted_vehicle) or _mounted_vehicle.level not in [2,3,4,5,6]:
+		_notify(Localization.text("Usa il parcheggio alla guida di un mezzo a motore."))
 		return
 	_vehicle_motion.parking_brake = not _vehicle_motion.parking_brake
 	_close_pause_menu()
-	_notify("Freno di stazionamento inserito." if _vehicle_motion.parking_brake else "Freno di stazionamento rilasciato.")
+	_notify(Localization.text("Freno di stazionamento inserito.") if _vehicle_motion.parking_brake else Localization.text("Freno di stazionamento rilasciato."))
 
 func _specific_action(action: String, id: String) -> void:
 	if not _near_garage():
-		_notify("Raggiungi il monitor dell'ufficio per gestire le richieste.")
+		_notify(Localization.text("Raggiungi il monitor dell'ufficio per gestire le richieste."))
 		return
 	var success: bool = false
 	match action:
@@ -2985,10 +3036,10 @@ func _specific_action(action: String, id: String) -> void:
 		"cancel": success = _game_state.specifics.cancel()
 	if success:
 		_close_pause_menu()
-		_notify("Richiesta aggiornata e salvata. Scanner F per cercare i pezzi.")
+		_notify(Localization.text("Richiesta aggiornata e salvata. Scanner F per cercare i pezzi."))
 	else:
 		_close_pause_menu()
-		_notify("Controlla requisiti, deposito e salvataggio.")
+		_notify(Localization.text("Controlla requisiti, deposito e salvataggio."))
 
 func _scan_specific_request(range_m: float) -> bool:
 	if _game_state.specifics.payload().is_empty():
@@ -3003,7 +3054,7 @@ func _scan_specific_request(range_m: float) -> bool:
 		_close_pause_menu()
 		_navigation_target = destination.global_position
 		_navigation_label = "SCANNER · RICHIESTA · "+("CONSEGNA AL MONITOR" if _game_state.specifics.ready() else "DEPOSITA ALLA BILANCIA")
-		_notify("Tutti i pezzi recuperati: "+("consegna al monitor." if _game_state.specifics.ready() else "deposita sacca e cassone."))
+		_notify(Localization.text("Tutti i pezzi recuperati: ")+(Localization.text("consegna al monitor.") if _game_state.specifics.ready() else Localization.text("deposita sacca e cassone.")))
 		return true
 	var best: float = range_m
 	var nearest: Node3D
@@ -3017,11 +3068,11 @@ func _scan_specific_request(range_m: float) -> bool:
 	if nearest==null:
 		if _navigation_label.begins_with("SCANNER"):
 			_navigation_label = ""
-		_notify("Nessun pezzo della richiesta entro %dm. Esplora o usa Maiusc+F per il libro." % range_m)
+		_notify(Localization.text("Nessun pezzo della richiesta entro %dm. Esplora o usa Maiusc+F per il libro.") % range_m)
 	else:
 		_navigation_target = nearest.global_position
 		_navigation_label = "SCANNER · RICHIESTA · "+nearest.display_name()
-		_notify("Pezzo richiesto trovato: "+nearest.display_name())
+		_notify(Localization.text("Pezzo richiesto trovato: ")+nearest.display_name())
 	return true
 
 func _near_crafted() -> Node3D:
@@ -3054,6 +3105,7 @@ func _craft_ground(kind: String, facing: float=INF) -> Dictionary:
 	var query = PhysicsShapeQueryParameters3D.new()
 	var shape = BoxShape3D.new()
 	shape.size = Vector3(1.35,0.85,1.45) if kind=="handcart" else Vector3(0.8,2.1,0.8)
+	if kind=="bale_pallet": shape.size=Vector3(1.5,1.3,1.3)
 	if kind=="field_depot":
 		shape.size=Vector3(1.6,1.3,1.6)
 	if kind in preload("res://scripts/gameplay/yard_structures.gd").KINDS:
@@ -3093,7 +3145,7 @@ func _craft_action(action: String, id: String, ticket: int) -> void:
 	elif action=="deploy":
 		if is_instance_valid(_mounted_vehicle) or not _game_state.operations.held.is_empty():
 			_close_pause_menu()
-			_notify("Scendi dal mezzo e libera le mani prima di posizionare.")
+			_notify(Localization.text("Scendi dal mezzo e libera le mani prima di posizionare."))
 			return
 		_close_pause_menu()
 		if id not in service.DEPLOYABLES or int(service.data().stock.get(id,0))<=0: return
@@ -3122,6 +3174,10 @@ func _craft_action(action: String, id: String, ticket: int) -> void:
 			_close_pause_menu()
 			return
 		match action:
+			"pallet_ship":
+				if _near_ops_service()=="dispatch": success=service.ship_pallet(id,ticket)
+			"pallet_load", "pallet_unload":
+				if _at_parts_storage(): success=service.transfer_bales(id,action=="pallet_load")
 			"pack": success = service.pack(id)
 			"load": success = service.load_cart(id)
 			"unload":
@@ -3134,37 +3190,48 @@ func _craft_action(action: String, id: String, ticket: int) -> void:
 					object.towing = self
 					object.add_collision_exception_with(self)
 					success = true
+			"unhitch":
+				if _towed_cart==object:
+					_stop_cart()
+					success=not is_instance_valid(object.tow_vehicle)
 	_close_pause_menu()
-	_notify(("Materiali riservati. Assemblaggio in corso nel garage." if action=="craft" and float(service.definitions()[id].get("seconds",0))>0 else "Operazione completata.") if success else "Operazione non riuscita: controlla scorte, spazio o salvataggio.")
+	_notify((Localization.text("Materiali riservati. Assemblaggio in corso nel garage.") if action=="craft" and float(service.definitions()[id].get("seconds",0))>0 else Localization.text("Operazione completata.")) if success else Localization.text("Operazione non riuscita: controlla scorte, spazio o salvataggio."))
 
 func _stop_cart() -> void:
 	if not is_instance_valid(_towed_cart):
 		return
 	var object = _towed_cart
+	if is_instance_valid(object.tow_vehicle):
+		if not _game_state.crafting.set_hitch(object.craft_id,"",object.global_position,object.rotation.y):
+			_notify(Localization.text("Sgancio non salvato: collegamento e carico conservati."))
+			return
+		object.remove_collision_exception_with(object.tow_vehicle.body)
+		object.tow_vehicle=null
+	elif not _game_state.crafting.move_object(object.craft_id,object.global_position,object.rotation.y):
+		_notify(Localization.text("Salvataggio non riuscito: carrello riportato all'ultima posizione."))
+		return
 	_towed_cart = null
 	object.towing = null
 	object.remove_collision_exception_with(self)
-	if not _game_state.crafting.move_object(object.craft_id,object.global_position,object.rotation.y):
-		get_tree().get_first_node_in_group("crafting_world").refresh()
-		_notify("Salvataggio non riuscito: carrello riportato all'ultima posizione.")
+	remove_collision_exception_with(object)
 
 func _toggle_vehicle_view() -> void:
-	if not is_instance_valid(_mounted_vehicle) or _mounted_vehicle.level not in [2,3]:
+	if not is_instance_valid(_mounted_vehicle) or _mounted_vehicle.level not in [2,3,4,5,6]:
 		return
 	_vehicle_third_person = not _vehicle_third_person
 	_update_vehicle_camera()
 	if _is_paused:
 		_close_pause_menu()
-	_notify("Visuale esterna · mouse per guardarti intorno." if _vehicle_third_person else "Visuale dal sedile.")
+	_notify(Localization.text("Visuale esterna · mouse per guardarti intorno.") if _vehicle_third_person else Localization.text("Visuale dal sedile."))
 
 func _update_vehicle_camera() -> void:
 	var visual: Node3D = _mounted_vehicle.visual
-	if not _vehicle_third_person or _mounted_vehicle.level not in [2,3]:
-		if _mounted_vehicle.level in [2,3]:
+	if not _vehicle_third_person or _mounted_vehicle.level not in [2,3,4,5,6]:
+		if _mounted_vehicle.level in [2,3,4,5,6]:
 			look_rotation.y = _vehicle_heading+clampf(wrapf(look_rotation.y-_vehicle_heading,-PI,PI),-1.75,1.75)
 			look_rotation.x = clampf(look_rotation.x,-1.05,0.8)
 		var seat: Vector3 = Vector3(0,1.7,0) if _mounted_vehicle.level==1 else (Vector3(0,1.78,-0.11) if _mounted_vehicle.level==3 else Vector3(0,1.94,-0.075))
-		if _mounted_vehicle.level in [2,3] and _vehicle_entry_time>0:
+		if _mounted_vehicle.level in [2,3,4,5,6] and _vehicle_entry_time>0:
 			seat+=Vector3(_vehicle_entry_side*1.35,-0.12,0.15)*pow(_vehicle_entry_time/0.24,2)
 		camera.position = visual.position+visual.basis*seat
 		camera.basis = (visual.basis*Basis.from_euler(Vector3(look_rotation.x,look_rotation.y-_vehicle_heading,0))).orthonormalized()
@@ -3197,7 +3264,7 @@ func _sell_crafted_product(id: String, ticket: int) -> void:
 	var success: bool = _game_state.crafting.sell_product(id,1,ticket)
 	preload("res://scripts/ui/customer_panel.gd").open(self,id)
 	if success:
-		_notify("Prodotto consegnato al cliente.")
+		_notify(Localization.text("Prodotto consegnato al cliente."))
 
 func _open_career(page: String = "story") -> void:
 	_career_current_page=page
@@ -3210,7 +3277,7 @@ func _claim_career(id: String) -> void:
 		_open_career("projects")
 	else:
 		_close_pause_menu()
-		_notify("Progetto non confermato: controlla requisiti e salvataggio.")
+		_notify(Localization.text("Progetto non confermato: controlla requisiti e salvataggio."))
 
 func _apply_career_route(step: Dictionary) -> void:
 	var point: Dictionary = preload("res://scripts/gameplay/yard_navigation.gd").objective(self,step)
@@ -3222,7 +3289,7 @@ func _track_career() -> void:
 	_career_tracking = true
 	_apply_career_route(_game_state.story.next_step())
 	_close_pause_menu()
-	_notify("Guida attiva. Il navigatore seguirà il prossimo passo; lo scanner seleziona una ricerca manuale.")
+	_notify(Localization.text("Guida attiva. Il navigatore seguirà il prossimo passo; lo scanner seleziona una ricerca manuale."))
 
 func _route_career_map(id: String) -> void:
 	var points: Dictionary = preload("res://scripts/gameplay/yard_navigation.gd").points(self)
@@ -3232,7 +3299,7 @@ func _route_career_map(id: String) -> void:
 	_navigation_target = points[id].position
 	_navigation_label = points[id].name
 	_close_pause_menu()
-	_notify("Destinazione: "+_navigation_label)
+	_notify(Localization.text("Destinazione: ")+_navigation_label)
 
 func _locate_recipe_requirement(kind: String) -> void:
 	if _near_ops_service()!="craft":
@@ -3257,7 +3324,7 @@ func _sell_surplus() -> void:
 	if not _near_depot():
 		return
 	var revenue: int = EconomyService.sell_surplus()
-	_notify("Avanzi venduti: +%d Bulloni." % revenue if revenue>0 else "Nessun avanzo venduto. Scorte conservate per gli obiettivi o salvataggio non riuscito.")
+	_notify(Localization.text("Avanzi venduti: +%d Bulloni.") % revenue if revenue>0 else Localization.text("Nessun avanzo venduto. Scorte conservate per gli obiettivi o salvataggio non riuscito."))
 	_refresh_station()
 
 func _confirm_sell_all() -> void:
@@ -3285,6 +3352,9 @@ func _play_feedback(kind: String) -> void:
 func _activate_interaction(focus: Dictionary) -> void:
 	match focus.kind:
 		"dismount": _dismount_vehicle()
+		"hitch":
+			if focus.detach: _stop_cart()
+			else: preload("res://scripts/gameplay/cart_hitch.gd").couple(self,focus.cart,focus.node)
 		"uncouple": _stop_cart()
 		"crafted": preload("res://scripts/ui/crafting_panel.gd").object_menu(self,focus.node)
 		"carry": _interact_carried()
@@ -3297,7 +3367,7 @@ func _activate_interaction(focus: Dictionary) -> void:
 			if focus.node.secret_id in _game_state.secrets_found or focus.node.discover():
 				_open_journal()
 			else:
-				_notify("Impossibile salvare la scoperta: riprova prima di allontanarti.")
+				_notify(Localization.text("Impossibile salvare la scoperta: riprova prima di allontanarti."))
 		"field_depot": _open_field_depot()
 		"vehicle": _mount_vehicle(focus.node)
 		"terminal": _open_service(focus.service)
@@ -3313,7 +3383,7 @@ func _cancel_fabrication(id: String) -> void:
 		return
 	var success: bool = _game_state.fabrication.cancel(id)
 	_open_fabrication_queue()
-	_notify("Lavoro annullato: materiali e componenti restituiti." if success else "Operazione non riuscita; lavoro conservato.")
+	_notify(Localization.text("Lavoro annullato: materiali e componenti restituiti.") if success else Localization.text("Operazione non riuscita; lavoro conservato."))
 
 func _on_panel_shortcut(event: InputEvent, title: String) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo or _gameplay_key(event):
@@ -3338,7 +3408,7 @@ func _recover_owned_buggy() -> void:
 			vehicle=candidate
 	var success: bool = _game_state.ops.recover_buggy(vehicle)
 	_close_pause_menu()
-	_notify("Buggy riportato al parcheggio · carico conservato · −%d Bulloni." % int(_game_state.logistics_def.buggy_recovery_cost) if success else "Soccorso non disponibile: controlla Bulloni, parcheggio libero e mezzo fermo.")
+	_notify(Localization.text("Buggy riportato al parcheggio · carico conservato · −%d Bulloni.") % int(_game_state.logistics_def.buggy_recovery_cost) if success else Localization.text("Soccorso non disponibile: controlla Bulloni, parcheggio libero e mezzo fermo."))
 
 
 

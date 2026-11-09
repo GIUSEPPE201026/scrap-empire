@@ -12,11 +12,11 @@ static func scrap_position(index: int) -> Vector3:
 	var local_index: int = index / CENTERS.size()
 	var angle: float = (local_index % 10) * TAU / 10.0 + zone * 0.17
 	var radius: float = 10.0 + (local_index / 10) * 2.8
-	if local_index % 4 == 0:
+	if local_index % 2 == 0:
 		# Keep collectible pockets clear of the partially buried assemblies.
 		if zone >= 3 and absf(wrapf(angle-(zone-3)*0.45,-PI,PI)) < 0.7:
 			angle += 0.95
-		radius = 4.4 + (local_index / 4) * 0.25
+		radius = 2.0 + (local_index % 7) * 0.62
 		radius *= footprint_scale(angle,zone)
 		return CENTERS[zone] + Vector3(cos(angle) * radius, surface_height(Vector3(cos(angle)*radius,0,sin(angle)*radius),zone) + 0.1, sin(angle) * radius)
 	return CENTERS[zone] + Vector3(cos(angle) * radius, 0, sin(angle) * radius)

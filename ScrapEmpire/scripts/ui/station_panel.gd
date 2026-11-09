@@ -86,5 +86,5 @@ static func refresh(player: Node) -> void:
 	var values: Dictionary=player._pause_menu.get_meta("station_values")
 	if values.is_empty(): return
 	values.bag.text="%.1f / %d kg" % [player.get_inventory_mass(),GameState.get_inventory_capacity(1)]
-	values.surplus.text="%d Bulloni" % GameState.story.surplus_value()
-	values.stock.text="Deposito: %d Bulloni · %d balle   /   Le scorte per gli obiettivi sono protette." % [GameState.get_deposit_value(),GameState.press_bales]
+	values.surplus.text=Localization.text("%d Bulloni") % GameState.story.surplus_value()
+	values.stock.text=Localization.format_text("Deposito: %d Bulloni · %d balle   /   Le scorte per gli obiettivi sono protette.", [GameState.get_deposit_value(),GameState.press_bales])

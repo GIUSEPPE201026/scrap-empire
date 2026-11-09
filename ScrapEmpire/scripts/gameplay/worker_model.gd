@@ -86,15 +86,19 @@ func _pose() -> void:
 			knee.z+=stride*0.13
 			hand.z-=stride*0.15
 		if scooter_pose:
+			foot=Vector3(side*0.085,0.08,side*0.21)
+			knee=Vector3(side*0.12,0.46,side*0.12)
 			elbow=Vector3(side*0.30,1.20,-0.25)
 			hand=Vector3(side*0.385,1.256,-0.833)
 		if skate_pose:
+			torso.rotation.y=0.65
+			torso.position.y=1.08
 			hip.x=side*0.12
 			knee=Vector3(side*0.09,0.45,side*0.23)
 			foot=Vector3(0,0.07,side*0.28)
 			hand=Vector3(side*0.36,0.96,side*0.12)
 			if side_index==1:
-				foot.y-=skate_push*0.21
+				foot.y-=skate_push*0.07
 				foot.x+=skate_push*0.25
 				foot.z+=skate_push*0.40
 		if bike_pose:

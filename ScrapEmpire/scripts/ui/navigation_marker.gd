@@ -27,7 +27,7 @@ static func draw_marker(hud: Control, player: Node3D) -> void:
 	else:
 		var direction=Vector2.from_angle(data.angle)
 		hud.draw_colored_polygon(PackedVector2Array([at+direction*13,at-direction.rotated(0.75)*10,at-direction.rotated(-0.75)*10]),color)
-	var label="ARRIVATO" if distance<=5 else "%.0f m" % distance
+	var label=Localization.text("ARRIVATO") if distance<=5 else "%.0f m" % distance
 	var box=Rect2(at+Vector2(-40,18),Vector2(80,24))
 	hud.draw_style_box(UI.style(Color("#202321e8"),false,2),box)
 	hud.draw_string(hud.get_theme_default_font(),box.position+Vector2(7,17),label,HORIZONTAL_ALIGNMENT_LEFT,-1,13,color)

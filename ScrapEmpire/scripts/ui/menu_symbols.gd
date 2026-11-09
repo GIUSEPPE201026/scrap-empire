@@ -2,6 +2,12 @@ extends RefCounted
 ## Original, resolution-independent service symbols. Text remains beside every icon.
 static var _textures: Dictionary = {}
 const SHAPES = {
+	"crane": '<circle cx="7" cy="27" r="3"/><circle cx="22" cy="27" r="3"/><path d="M3 24h23v-8H9L5 5h5l8 11M7 5h20v13m-4 0q4 7 8 0M13 10h10M5 19h8v5"/>',
+	"loader": '<circle cx="8" cy="26" r="4"/><circle cx="22" cy="26" r="4"/><path d="M3 22V11h12v11M7 11V5h11v12l9 3M17 12l10 9h4v-7M3 17h11"/>',
+	"vacuum": '<rect x="3" y="10" width="12" height="17" rx="3"/><path d="M6 10V5h6v5m3 5h5V6h4v20h6M20 26h10"/><circle cx="6" cy="29" r="2"/><circle cx="13" cy="29" r="2"/>',
+	"battery_pack": '<rect x="3" y="9" width="26" height="20" rx="3"/><path d="M8 9V4h5v5m7 0V4h5v5M7 17h6m-3-3v6m10-3h6M14 24h5"/>',
+	"forklift": '<circle cx="8" cy="26" r="4"/><circle cx="21" cy="26" r="3"/><path d="M3 23V14h13v9M7 14V5h13v15M16 14V8M24 3v24h7M27 3v20h4M5 18h8"/>',
+	"bale_pallet": '<path d="M2 25h28v5H2Zm2-3V10h11v12Zm13 0V10h11v12ZM7 10v12m14-12v12M5 30v-5m21 5v-5"/>',
 	"skateboard": '<path d="m3 18 22-7q8-2 5 3L8 23q-7 2-5-5Zm4 5v4m17-10v5"/><circle cx="8" cy="27" r="2"/><circle cx="24" cy="23" r="2"/>',
 	"dirtbike": '<circle cx="7" cy="24" r="6"/><circle cx="26" cy="24" r="5"/><path d="m7 24 6-12 7 12H7Zm6-12h9l4 12M10 9h8m2-6h5l-3 9M4 15h7"/>',
 	"yard_wall": '<path d="M3 29V5h26v24M3 8h26M7 8v21m6-21v21m6-21v21m6-21v21M1 29h30"/>',
@@ -54,6 +60,9 @@ const SHAPES = {
 }
 
 static func icon(key: String, pixels: int=32) -> Texture2D:
+	var model: String={"truck":"buggy","bag":"bag_frame","warehouse":"field_depot","box":"field_depot","press":"press_machine","repair":"repair_kit","cutters":"bolt_cutters","suspension":"suspension_kit","light":"work_lamp","radio":"restored_radio","bench":"garden_bench","wheel":"wheel"}.get(key,key)
+	var preview: String="res://assets/ui/catalog/%s.png" % model
+	if ResourceLoader.exists(preview): return load(preview)
 	var cache_key: String=key+str(pixels)
 	if not _textures.has(cache_key):
 		var svg: String = '<svg xmlns="http://www.w3.org/2000/svg" width="'+str(pixels)+'" height="'+str(pixels)+'" viewBox="0 0 32 32"><g fill="none" stroke="#e7eceb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+SHAPES.get(key,SHAPES.box)+'</g></svg>'

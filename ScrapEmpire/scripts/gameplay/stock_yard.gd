@@ -66,7 +66,7 @@ func refresh() -> void:
 		art.beveled_box(stock,Vector3(1.6,0.55,1.0),Vector3(-2.1,0.35,2.1),art.YELLOW)
 		for i in 4:
 			art.box(stock,Vector3(0.025,0.56,1.02),Vector3(-2.7+i*0.4,0.35,2.1),art.GRAPHITE)
-		var label = art.sign_text(stock,"PEZZI SU RICHIESTA · %d" % GameState.specifics.units("stock"),Vector3(-2.1,0.8,2.1),26,true)
+		var label = art.sign_text(stock,Localization.text("PEZZI SU RICHIESTA · %d") % GameState.specifics.units("stock"),Vector3(-2.1,0.8,2.1),26,true)
 		label.pixel_size = 0.003
 		var shown: int = 0
 		for key in GameState.specifics.payload().stock:

@@ -37,7 +37,7 @@ func _ready() -> void:
 
 	# Carica nome salvato
 	var config = ConfigFile.new()
-	if config.load("user://settings.cfg") == OK:
+	if config.load(Localization.settings_path) == OK:
 		input_name.text = config.get_value("player", "name", "Player")
 
 	btn_host.pressed.connect(_on_host_pressed)
@@ -105,12 +105,12 @@ func _on_join_confirmed() -> void:
 
 func _save_name() -> void:
 	var config = ConfigFile.new()
-	config.load("user://settings.cfg")
+	config.load(Localization.settings_path)
 	config.set_value("player", "name", input_name.text.left(24))
-	config.save("user://settings.cfg")
+	config.save(Localization.settings_path)
 
 func _on_connection_failed(reason: String) -> void:
-	_show_error("Connessione fallita: %s" % reason)
+	_show_error(Localization.text("Connessione fallita: %s") % reason)
 
 func _show_error(message: String) -> void:
 	var dialog = AcceptDialog.new()

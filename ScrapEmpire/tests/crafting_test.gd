@@ -178,6 +178,44 @@ func run() -> void:
 	Input.action_release("move_back")
 	check(cart.position.distance_to(start)>0.5,"walking moves the loaded cart through real collision motion")
 	await snapshot_prop(player,cart,"crafted_cart_loaded")
+	GameState.yard_level=1
+	GameState.vehicle_level=2
+	var prior_orders: Array=GameState.completed_orders.duplicate()
+	GameState.completed_orders=[GameState.order_defs[0].id]
+	GameState.team_credits=1000
+	check(GameState.purchase_module("tow_package") and GameState.team_credits==450,"reinforced tow upgrade purchases at configured price")
+	GameState.completed_orders.assign(prior_orders)
+	get_tree().get_first_node_in_group("sector").spawn_owned_vehicles()
+	var buggy=get_tree().get_nodes_in_group("yard_vehicles").filter(func(v):return v.level==2)[0]
+	buggy.position=cart.position+Vector3(0,0,-3.4)
+	player.global_position=buggy.global_position+Vector3(1.3,0.1,0)
+	await look(player,player.global_position,buggy.global_position+Vector3(0,1.2,0.15))
+	var mount_focus: Dictionary=preload("res://scripts/gameplay/interaction_focus.gd").resolve(player)
+	check(mount_focus.kind=="vehicle","looking at buggy seat while towing offers boarding rather than uncoupling")
+	player._activate_interaction(mount_focus)
+	check(player._mounted_vehicle==buggy and player._towed_cart==cart,"buggy mount retains attached loaded cart")
+	var before_tow: Vector3=cart.position
+	hold_test_action("move_forward")
+	await frames(60)
+	release_test_action("move_forward")
+	check(cart.position.distance_to(before_tow)>0.5 and player._towed_cart==cart,"buggy physically tows cart without losing attachment")
+	player._vehicle_motion.parking_brake=true
+	await frames(40)
+	player._vehicle_motion.parking_brake=false
+	hold_test_action("move_back")
+	await frames(18)
+	release_test_action("move_back")
+	check(is_instance_valid(player._towed_cart) and absf(player._vehicle_speed)<4.0,"loaded trailer reverses slowly without teleport or detachment")
+	check(craft.cart_mass(id)==20,"vehicle towing and reverse preserve exact cargo mass")
+	player._vehicle_motion.parking_brake=true
+	await frames(40)
+	player._dismount_vehicle()
+	check(cart.tow_vehicle==buggy and player._towed_cart==cart,"dismount keeps the physical vehicle hitch")
+	player._stop_cart()
+	buggy.global_position=Vector3(40,0.08,30)
+	player._towed_cart=cart
+	cart.towing=player
+	cart.add_collision_exception_with(player)
 	player._open_pause_menu()
 	check(player._towed_cart==null and Vector3(craft.data().objects[id].position[0],craft.data().objects[id].position[1],craft.data().objects[id].position[2]).distance_to(cart.position)<0.1,"opening menu releases cart and checkpoints position")
 	player._close_pause_menu()

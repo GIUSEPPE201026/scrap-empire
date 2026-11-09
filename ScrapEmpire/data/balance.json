@@ -949,7 +949,7 @@
     {
       "level": 1,
       "cost": 750,
-      "name": "Lotto Est · officina di recupero",
+      "name": "Lotto Est Ãƒâ€šÃ‚Â· officina di recupero",
       "materials": {
         "copper": 12,
         "aluminum": 12
@@ -962,7 +962,7 @@
     {
       "level": 2,
       "cost": 1500,
-      "name": "Lotto delle dune · logistica e produzione",
+      "name": "Lotto delle dune Ãƒâ€šÃ‚Â· logistica e produzione",
       "materials": {
         "glass": 12,
         "rubber": 12
@@ -1011,7 +1011,7 @@
     {
       "id": "nut_king",
       "name": "Il Re dei Bulloni",
-      "description": "Ogni impero comincia da un piccolo dado. Questo non è piccolo.",
+      "description": "Ogni impero comincia da un piccolo dado. Questo non ÃƒÆ’Ã‚Â¨ piccolo.",
       "hint": "A sud, una sagoma metallica spunta dalla sabbia.",
       "reward": 300
     }
@@ -1109,7 +1109,7 @@
     {
       "id": "fleet_service",
       "name": "Una flotta per il recupero",
-      "description": "Rifornisci l’officina, acquista il buggy e prepara i trasporti del centro.",
+      "description": "Rifornisci lÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢officina, acquista il buggy e prepara i trasporti del centro.",
       "materials": {
         "metal": 12,
         "copper": 6,
@@ -1140,7 +1140,7 @@
     "motor": {
       "name": "Trasmissione",
       "icon": "motor",
-      "description": "Velocità e ripresa di entrambi i mezzi",
+      "description": "VelocitÃƒÆ’Ã‚Â  e ripresa di entrambi i mezzi",
       "requires": "vehicle",
       "levels": [
         {
@@ -1170,7 +1170,7 @@
     "suspension": {
       "name": "Sospensioni da dune",
       "icon": "suspension",
-      "description": "Assetto più reattivo e sterzo più preciso",
+      "description": "Assetto piÃƒÆ’Ã‚Â¹ reattivo e sterzo piÃƒÆ’Ã‚Â¹ preciso",
       "requires": "vehicle",
       "levels": [
         {
@@ -1200,7 +1200,7 @@
     "workbench": {
       "name": "Banco di precisione",
       "icon": "workbench",
-      "description": "Ripara componenti nel Lotto Est e smonta più rapidamente",
+      "description": "Ripara componenti nel Lotto Est e smonta piÃƒÆ’Ã‚Â¹ rapidamente",
       "requires": "tool",
       "levels": [
         {
@@ -1230,7 +1230,7 @@
     "press_drive": {
       "name": "Idraulica della pressa",
       "icon": "press",
-      "description": "Cicli più rapidi; livello 2 abilita tramoggia nel Lotto dune",
+      "description": "Cicli piÃƒÆ’Ã‚Â¹ rapidi; livello 2 abilita tramoggia nel Lotto dune",
       "requires": "press",
       "levels": [
         {
@@ -1260,7 +1260,7 @@
     "cargo_rack": {
       "name": "Cassone modulare",
       "icon": "motor",
-      "description": "Più carico e componenti ingombranti sul buggy",
+      "description": "PiÃƒÆ’Ã‚Â¹ carico e componenti ingombranti sul buggy",
       "requires": "buggy",
       "levels": [
         {
@@ -1322,7 +1322,7 @@
     "harness": {
       "name": "Imbracatura da recupero",
       "icon": "harness",
-      "description": "Trascinamento e cammino durante il traino più rapidi",
+      "description": "Trascinamento e cammino durante il traino piÃƒÆ’Ã‚Â¹ rapidi",
       "requires": "tool",
       "unit": "multiplier",
       "levels": [
@@ -1415,7 +1415,7 @@
     "brakes": {
       "name": "Freni rinforzati",
       "icon": "brakes",
-      "description": "Frenata del buggy più potente; utile con cassone carico e in discesa",
+      "description": "Frenata del buggy piÃƒÆ’Ã‚Â¹ potente; utile con cassone carico e in discesa",
       "requires": "buggy",
       "unit": "braking",
       "levels": [
@@ -1446,7 +1446,7 @@
     "tyres": {
       "name": "Pneumatici da dune",
       "icon": "tyres",
-      "description": "Più aderenza laterale del buggy e recupero più rapido dopo una sbandata",
+      "description": "PiÃƒÆ’Ã‚Â¹ aderenza laterale del buggy e recupero piÃƒÆ’Ã‚Â¹ rapido dopo una sbandata",
       "requires": "buggy",
       "unit": "grip",
       "levels": [
@@ -1477,7 +1477,7 @@
     "assembly": {
       "name": "Dime di assemblaggio",
       "icon": "workbench",
-      "description": "Prodotti complessi più rapidi; livello 2 estende la coda da 3 a 6 lavori",
+      "description": "Prodotti complessi piÃƒÆ’Ã‚Â¹ rapidi; livello 2 estende la coda da 3 a 6 lavori",
       "requires": "tool",
       "levels": [
         {
@@ -1501,6 +1501,101 @@
           "effect": 0.45,
           "orders": 5,
           "deliveries": 5
+        }
+      ]
+    },
+    "vacuum": {
+      "name": "Aspiratore portatile",
+      "icon": "vacuum",
+      "description": "Aspira scarti leggeri entro 3 metri; usa la capacita della sacca. Equipaggia da Attrezzatura.",
+      "requires": "tool",
+      "unit": "m",
+      "levels": [
+        {
+          "effect": 3,
+          "cost": 1100,
+          "orders": 2
+        }
+      ]
+    },
+    "bike_handling": {
+      "name": "Ciclistica moto",
+      "icon": "dirtbike",
+      "description": "Freni e pneumatici moto: maggiore controllo e recupero progressivo della trazione. Ctrl attiva il freno posteriore.",
+      "requires": "tool",
+      "unit": "handling",
+      "levels": [
+        {
+          "cost": 600,
+          "effect": 1.15,
+          "orders": 1
+        },
+        {
+          "cost": 1400,
+          "effect": 1.35,
+          "orders": 3
+        }
+      ]
+    },
+    "tow_package": {
+      "name": "Kit traino rinforzato",
+      "icon": "handcart",
+      "description": "Riduce la penalita di accelerazione del buggy con rimorchio carico. Il traino base resta disponibile senza kit.",
+      "requires": "buggy",
+      "unit": "towing",
+      "levels": [
+        {
+          "cost": 550,
+          "effect": 1.2,
+          "orders": 1
+        },
+        {
+          "cost": 1250,
+          "effect": 1.45,
+          "orders": 3
+        }
+      ]
+    },
+    "hydraulics": {
+      "name": "Idraulica industriale",
+      "icon": "forklift",
+      "description": "Bracci, benne e forche piu rapidi su muletto, gru e minipala.",
+      "requires": "industrial",
+      "unit": "speed",
+      "levels": [
+        {
+          "cost": 900,
+          "effect": 1.2,
+          "orders": 2
+        },
+        {
+          "cost": 1900,
+          "effect": 1.45,
+          "orders": 3
+        },
+        {
+          "cost": 3500,
+          "effect": 1.7,
+          "orders": 5
+        }
+      ]
+    },
+    "industrial_drive": {
+      "name": "Trasmissione industriale",
+      "icon": "engine",
+      "description": "Migliora accelerazione e velocita di lavoro dei mezzi industriali, mantenendo la penalita del carico.",
+      "requires": "industrial",
+      "unit": "speed",
+      "levels": [
+        {
+          "cost": 1200,
+          "effect": 1.15,
+          "orders": 3
+        },
+        {
+          "cost": 2600,
+          "effect": 1.3,
+          "orders": 5
         }
       ]
     }
@@ -1685,7 +1780,19 @@
           "wheel": 2
         },
         "capacity_kg": 60,
-        "tow_speed_mps": 3
+        "tow_speed_mps": 3,
+        "towing": {
+          "buggy": {
+            "capacity_kg": 60,
+            "distance": 3.65,
+            "speed_multiplier": 0.7
+          },
+          "dirtbike": {
+            "capacity_kg": 20,
+            "distance": 2.65,
+            "speed_multiplier": 0.55
+          }
+        }
       },
       "desk_lamp": {
         "name": "Lampada da tavolo",
@@ -1915,12 +2022,45 @@
           "rubber": 2
         },
         "parts": {}
+      },
+      "bale_pallet": {
+        "name": "Pallet industriale",
+        "description": "Riserva e organizza fino a quattro balle della pressa. Carica e scarica vicino al deposito.",
+        "orders": 0,
+        "tool": 0,
+        "limit": 4,
+        "materials": {
+          "metal": 2,
+          "plastic": 1
+        },
+        "parts": {},
+        "capacity_bales": 4
+      },
+      "battery_pack": {
+        "name": "Accumulatore ricondizionato",
+        "description": "Una batteria recuperata funzionante diventa alimentazione portatile per i tecnici del deserto. Ripara prima i componenti danneggiati.",
+        "orders": 2,
+        "tool": 1,
+        "land": 1,
+        "module": "workbench",
+        "module_level": 1,
+        "limit": 8,
+        "seconds": 24,
+        "materials": {
+          "plastic": 2,
+          "electronics": 1,
+          "copper": 1
+        },
+        "parts": {
+          "battery": 1
+        },
+        "customer": "luca"
       }
     },
     "customers": [
       {
         "id": "marta",
-        "name": "Marta · artigiana del quartiere",
+        "name": "Marta Ãƒâ€šÃ‚Â· artigiana del quartiere",
         "product": "desk_lamp",
         "orders": 1,
         "daily_units": 3,
@@ -1933,7 +2073,7 @@
       },
       {
         "id": "enzo",
-        "name": "Enzo · manutentore",
+        "name": "Enzo Ãƒâ€šÃ‚Â· manutentore",
         "product": "toolbox",
         "orders": 2,
         "daily_units": 2,
@@ -1946,7 +2086,7 @@
       },
       {
         "id": "nina",
-        "name": "Nina · bottega del riuso",
+        "name": "Nina Ãƒâ€šÃ‚Â· bottega del riuso",
         "product": "restored_radio",
         "orders": 2,
         "daily_units": 2,
@@ -1959,7 +2099,7 @@
       },
       {
         "id": "bruno",
-        "name": "Bruno · capocantiere",
+        "name": "Bruno Ãƒâ€šÃ‚Â· capocantiere",
         "product": "bench_compressor",
         "orders": 3,
         "daily_units": 1,
@@ -1972,7 +2112,7 @@
       },
       {
         "id": "ada",
-        "name": "Ada · giardini di Riva Secca",
+        "name": "Ada Ãƒâ€šÃ‚Â· giardini di Riva Secca",
         "product": "garden_bench",
         "orders": 3,
         "daily_units": 2,
@@ -1982,11 +2122,24 @@
           0,
           19
         ]
+      },
+      {
+        "id": "luca",
+        "name": "Luca Ã‚Â· tecnico delle spedizioni",
+        "product": "battery_pack",
+        "orders": 2,
+        "daily_units": 2,
+        "price": 380,
+        "position": [
+          32,
+          0,
+          19
+        ]
       }
     ],
     "story": {
       "title": "Le tre promesse di Riva Secca",
-      "intro": "Marta ti ha affidato il vecchio deposito di Riva Secca. Qui finiva tutto ciò che il paese non sapeva più aggiustare. Enzo vuole rimettere in moto l'officina: tu puoi trasformare questo posto nel centro che mancava al quartiere. Prima riapri i servizi, poi dimostra che recuperare può creare lavoro.",
+      "intro": "Marta ti ha affidato il vecchio deposito di Riva Secca. Qui finiva tutto ciÃƒÆ’Ã‚Â² che il paese non sapeva piÃƒÆ’Ã‚Â¹ aggiustare. Enzo vuole rimettere in moto l'officina: tu puoi trasformare questo posto nel centro che mancava al quartiere. Prima riapri i servizi, poi dimostra che recuperare puÃƒÆ’Ã‚Â² creare lavoro.",
       "chapters": [
         {
           "title": "Un cancello da riaprire",
@@ -1995,7 +2148,7 @@
           "unlock": "Con la prima commessa iniziano gli acquisti dei clienti e le richieste di ricambi."
         },
         {
-          "title": "Il valore è nei dettagli",
+          "title": "Il valore ÃƒÆ’Ã‚Â¨ nei dettagli",
           "sender": "Enzo",
           "letter": "Un martello non ripara un circuito. Compra il cacciavite e apri il Lotto Est: rame e alluminio ci permettono di tornare a fare lavori di precisione.",
           "unlock": "Banco recupero, materiali di precisione e il primo trasporto serio."
@@ -2003,19 +2156,19 @@
         {
           "title": "Oltre il recinto",
           "sender": "Marta",
-          "letter": "Nelle dune c'è abbastanza materiale per una linea di lavoro. Apri il secondo lotto e metti in funzione la pressa. I primi clienti sono già qui: conserva qualcosa anche per loro.",
+          "letter": "Nelle dune c'ÃƒÆ’Ã‚Â¨ abbastanza materiale per una linea di lavoro. Apri il secondo lotto e metti in funzione la pressa. I primi clienti sono giÃƒÆ’Ã‚Â  qui: conserva qualcosa anche per loro.",
           "unlock": "Vetro, gomma, produzione e banchina delle spedizioni."
         },
         {
           "title": "Niente viaggi a vuoto",
           "sender": "Enzo",
-          "letter": "Con il buggy puoi riportare componenti interi. Carica dal cassone, scarica al magazzino e ripara quello che vale la pena salvare. È così che il deposito diventa un'officina.",
+          "letter": "Con il buggy puoi riportare componenti interi. Carica dal cassone, scarica al magazzino e ripara quello che vale la pena salvare. ÃƒÆ’Ã‹â€  cosÃƒÆ’Ã‚Â¬ che il deposito diventa un'officina.",
           "unlock": "Una flotta di recupero pronta ai contratti industriali."
         },
         {
           "title": "Il nome sul cancello",
           "sender": "Marta",
-          "letter": "L'ultima fornitura ci farà ottenere la certificazione. Poi verrà la parte che conta: clienti che ritornano, una linea affidabile e un archivio dei pezzi che abbiamo salvato.",
+          "letter": "L'ultima fornitura ci farÃƒÆ’Ã‚Â  ottenere la certificazione. Poi verrÃƒÆ’Ã‚Â  la parte che conta: clienti che ritornano, una linea affidabile e un archivio dei pezzi che abbiamo salvato.",
           "unlock": "Certificazione, forniture continue e tre progetti per il futuro."
         }
       ],
@@ -2024,10 +2177,10 @@
           "id": "community",
           "name": "La fiducia del quartiere",
           "speaker": "Marta",
-          "description": "Non basta vendere ferro: il quartiere deve tornare a usare ciò che costruiamo. Consegna prodotti finiti a entrambi i clienti.",
+          "description": "Non basta vendere ferro: il quartiere deve tornare a usare ciÃƒÆ’Ã‚Â² che costruiamo. Consegna prodotti finiti a entrambi i clienti.",
           "orders": 2,
           "reward": 1200,
-          "benefit": "I due clienti acquistano 1 prodotto in più ogni giorno. Nuova illuminazione del piazzale.",
+          "benefit": "I due clienti acquistano 1 prodotto in piÃƒÆ’Ã‚Â¹ ogni giorno. Nuova illuminazione del piazzale.",
           "rules": [
             {
               "metric": "marta_sales",
@@ -2048,7 +2201,7 @@
           "description": "Una piccola industria si riconosce dalle consegne affidabili. Installa gli impianti e completa forniture ripetibili dopo la certificazione.",
           "orders": 5,
           "reward": 1800,
-          "benefit": "Cicli della pressa più rapidi del 10%, dal prossimo lotto. Targa della linea certificata.",
+          "benefit": "Cicli della pressa piÃƒÆ’Ã‚Â¹ rapidi del 10%, dal prossimo lotto. Targa della linea certificata.",
           "rules": [
             {
               "metric": "deliveries",
@@ -2069,7 +2222,7 @@
         },
         {
           "id": "archive",
-          "name": "Niente è soltanto spazzatura",
+          "name": "Niente ÃƒÆ’Ã‚Â¨ soltanto spazzatura",
           "speaker": "Marta",
           "description": "Impara a riconoscere i pezzi invece di ridurli tutti allo stesso metallo. Documenta i ritrovamenti e porta a termine recuperi mirati.",
           "orders": 3,
@@ -2094,12 +2247,12 @@
           ]
         }
       ],
-      "epilogue": "Il cancello non porta più il nome di una discarica abbandonata. A Riva Secca si torna qui per comprare, riparare e lavorare. Hai mantenuto le tre promesse: ora il centro è tuo. Le spedizioni, i clienti e le forniture continuano.",
+      "epilogue": "Il cancello non porta piÃƒÆ’Ã‚Â¹ il nome di una discarica abbandonata. A Riva Secca si torna qui per comprare, riparare e lavorare. Hai mantenuto le tre promesse: ora il centro ÃƒÆ’Ã‚Â¨ tuo. Le spedizioni, i clienti e le forniture continuano.",
       "aftermath": {
         "title": "Le promesse diventano lavoro",
         "sender": "Enzo",
-        "letter": "La certificazione è arrivata. Ora manteniamo la parola data al quartiere: prodotti che tornano utili, forniture affidabili e pezzi che meritano di essere riconosciuti.",
-        "unlock": "Tre riconoscimenti permanenti. Completali tutti per concludere la storia del centro; l'attività continuerà."
+        "letter": "La certificazione ÃƒÆ’Ã‚Â¨ arrivata. Ora manteniamo la parola data al quartiere: prodotti che tornano utili, forniture affidabili e pezzi che meritano di essere riconosciuti.",
+        "unlock": "Tre riconoscimenti permanenti. Completali tutti per concludere la storia del centro; l'attivitÃƒÆ’Ã‚Â  continuerÃƒÆ’Ã‚Â ."
       }
     },
     "buggy_recovery_cost": 100,
@@ -2161,6 +2314,117 @@
         "steering": 2.2,
         "suspension_response": 9,
         "jump_velocity": 4.2
+      },
+      "forklift": {
+        "name": "Muletto industriale",
+        "cost": 3200,
+        "requires_land": 1,
+        "speed_mps": 5,
+        "acceleration": 2.5,
+        "braking": 12,
+        "coast_drag": 2,
+        "steering": 1.5,
+        "suspension_response": 7,
+        "jump_velocity": 0
+      },
+      "crane": {
+        "name": "Gru magnetica mobile",
+        "cost": 6500,
+        "requires_land": 2,
+        "speed_mps": 4,
+        "acceleration": 2,
+        "braking": 14,
+        "coast_drag": 2,
+        "steering": 1.3,
+        "suspension_response": 7,
+        "jump_velocity": 0,
+        "capacity_kg": 300,
+        "capacity_items": 1
+      },
+      "loader": {
+        "name": "Minipala da recupero",
+        "cost": 4200,
+        "requires_land": 2,
+        "speed_mps": 5,
+        "acceleration": 2,
+        "braking": 14,
+        "coast_drag": 2,
+        "steering": 1.3,
+        "suspension_response": 7,
+        "jump_velocity": 0,
+        "capacity_kg": 40,
+        "capacity_items": 4
+      }
+    },
+    "vacuum": {
+      "materials": [
+        "plastic",
+        "electronics",
+        "rubber"
+      ],
+      "max_piece_kg": 2,
+      "seconds_per_piece": 0.6
+    },
+    "industrial_jobs": {
+      "crane": {
+        "description": "Deposita componenti ferrosi usando il magnete della gru e G al magazzino.",
+        "tiers": [
+          {
+            "name": "Primo recupero pesante",
+            "goal": 3,
+            "reward": 300
+          },
+          {
+            "name": "Squadra demolizioni",
+            "goal": 5,
+            "reward": 700
+          },
+          {
+            "name": "Recuperatore industriale",
+            "goal": 7,
+            "reward": 1400
+          }
+        ]
+      },
+      "loader": {
+        "description": "Raccogli rottami nella benna e scaricali al deposito con G.",
+        "tiers": [
+          {
+            "name": "Piazzale in ordine",
+            "goal": 12,
+            "reward": 180
+          },
+          {
+            "name": "Trasporto alla rinfusa",
+            "goal": 24,
+            "reward": 420
+          },
+          {
+            "name": "Turno di carico",
+            "goal": 36,
+            "reward": 850
+          }
+        ]
+      },
+      "forklift": {
+        "description": "Spedisci balle alla banchina dal terminale H, con il pallet sulle forche.",
+        "tiers": [
+          {
+            "name": "Prima spedizione su pallet",
+            "goal": 4,
+            "reward": 250
+          },
+          {
+            "name": "Logistica del quartiere",
+            "goal": 8,
+            "reward": 550
+          },
+          {
+            "name": "Operatore di banchina",
+            "goal": 12,
+            "reward": 1100
+          }
+        ]
       }
     }
   },
@@ -2395,6 +2659,21 @@
       },
       "bales": 0,
       "reward": 1900
+    },
+    {
+      "id": "oasis_power",
+      "name": "Energia per il punto oasi",
+      "description": "Invia dalla banchina tre accumulatori ricondizionati e materiali di collegamento. Il punto di scarico dell oasi ricevera batterie e illuminazione permanenti.",
+      "materials": {
+        "electronics": 2,
+        "rubber": 4
+      },
+      "parts": {},
+      "products": {
+        "battery_pack": 3
+      },
+      "bales": 0,
+      "reward": 1450
     }
   ]
 }

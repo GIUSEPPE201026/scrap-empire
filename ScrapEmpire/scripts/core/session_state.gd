@@ -88,6 +88,8 @@ func start_joining(ip: String, port: int) -> void:
 	# NetworkGateway gestisce la connessione
 
 func start_single_player() -> void:
+	if current_state != ConnectionState.DISCONNECTED:
+		return
 	is_single_player_session = true
 	if not progression_loaded:
 		if not SaveService._find_latest_save(0).is_empty() and not SaveService.load_save():
@@ -95,9 +97,11 @@ func start_single_player() -> void:
 			for checkpoint in SaveService.list_saves():
 				if checkpoint.slot == 0 and GameState.deserialize(JSON.parse_string(FileAccess.get_file_as_string(checkpoint.path))):
 					break
-		if not SaveService.apply_pending_owner_bonus():
-			progression_notice = "Bonus locale non applicato: salvataggio non riuscito. Riprova al prossimo avvio."
 		progression_loaded = true
+	if not SaveService.apply_pending_owner_bonus():
+		progression_notice = "Bonus locale non applicato: salvataggio non riuscito. Riprova al prossimo ingresso."
+	elif progression_notice.begins_with("Bonus locale"):
+		progression_notice=""
 	# print("[SESSION_STATE] start_single_player() called")
 	if current_state != ConnectionState.DISCONNECTED:
 		# print("[SESSION_STATE] Not DISCONNECTED, current state: ", get_state_name())
@@ -259,7 +263,12 @@ func _enter_mission() -> void:
 	transition_to(ConnectionState.MISSION)
 	mission_starting.emit()
 
+var _returning_to_menu: bool = false
+
 func _cleanup_and_return_to_menu() -> void:
+	if _returning_to_menu:
+		return
+	_returning_to_menu = true
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	# Drain Area3D overlaps before freeing the player and the whole sector.
@@ -294,6 +303,7 @@ func _cleanup_and_return_to_menu() -> void:
 	pending_scene = null
 	transition_to(ConnectionState.DISCONNECTED)
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	_returning_to_menu = false
 
 func get_local_player() -> Dictionary:
 	for p in players:

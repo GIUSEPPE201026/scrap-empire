@@ -3,6 +3,15 @@ extends RefCounted
 static func build(root: Node3D, kind: String) -> void:
 	var art = preload("res://scripts/gameplay/scrapyard_art.gd").new()
 	match kind:
+		"battery_pack":
+			art.beveled_box(root,Vector3(0.55,0.42,0.32),Vector3(0,0.23,0),art.MINT,true)
+			art.box(root,Vector3(0.57,0.07,0.34),Vector3(0,0.47,0),art.GRAPHITE)
+			for side in [-1,1]:
+				art.cylinder(root,0.035,0.07,Vector3(side*0.17,0.54,0),art.YELLOW,12)
+				art.beam(root,Vector3(side*0.12,0.51,0.1),Vector3(side*0.12,0.65,0.1),0.025,art.GRAPHITE)
+			art.beam(root,Vector3(-0.12,0.65,0.1),Vector3(0.12,0.65,0.1),0.025,art.GRAPHITE)
+			art.box(root,Vector3(0.22,0.14,0.015),Vector3(0,0.26,-0.17),art.GRAPHITE)
+			art.box(root,Vector3(0.12,0.045,0.018),Vector3(0,0.26,-0.18),art.YELLOW)
 		"restored_radio":
 			art.beveled_box(root,Vector3(0.65,0.38,0.24),Vector3(0,0.2,0),Color("#b37d4c"))
 			art.box(root,Vector3(0.32,0.24,0.015),Vector3(-0.11,0.22,-0.13),art.GRAPHITE)

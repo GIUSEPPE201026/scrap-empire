@@ -440,7 +440,7 @@ func claim_salvage(entity_id: String, definition_id: String, expected_stage: int
 		return {"success": false, "message": "Fase già completata."}
 	var step: Dictionary = steps[stage]
 	if not owns_tool(tool) or tool != int(step.get("tool", 0)):
-		return {"success": false, "message": "Serve %s [%d]." % [tool_defs[int(step.get("tool", 0))].name, int(step.get("tool", 0)) + 1]}
+		return {"success": false, "message": Localization.format_text("Serve %s [%d].", [tool_defs[int(step.get("tool", 0))].name, int(step.get("tool", 0)) + 1])}
 	if yard_level < int(step.land):
 		return {"success": false, "message": "Servono attrezzature del Lotto Est: acquistalo al garage."}
 	var added_mass: float = 0
@@ -508,7 +508,7 @@ func purchase_land() -> bool:
 	credits_changed.emit(team_credits)
 	deposit_changed.emit(team_credits, team_deposit_counts.duplicate())
 	land_unlocked.emit(yard_level)
-	machine_message.emit("Lotto aperto! Passa dal varco Est: rottami e scarico satellite già disponibili.")
+	machine_message.emit(Localization.text("Lotto aperto! Passa dal varco Est: rottami e scarico satellite già disponibili."))
 	return true
 
 func get_deposit_value() -> int:
@@ -525,10 +525,10 @@ func purchase_press() -> bool:
 	if not SaveService.save_checkpoint():
 		press_owned = false
 		team_credits += int(press_def.cost)
-		machine_message.emit("Acquisto annullato: salvataggio non riuscito.")
+		machine_message.emit(Localization.text("Acquisto annullato: salvataggio non riuscito."))
 		return false
 	credits_changed.emit(team_credits)
-	machine_message.emit("Pressa acquistata! Deposita metallo e avvia un ciclo.")
+	machine_message.emit(Localization.text("Pressa acquistata! Deposita metallo e avvia un ciclo."))
 	return true
 
 func start_press() -> bool:
@@ -565,9 +565,9 @@ func _process(delta: float) -> void:
 		deposit_changed.emit(team_credits,team_deposit_counts.duplicate())
 		operations_changed.emit()
 		if not SaveService.save_checkpoint():
-			machine_message.emit("Produzione in memoria: salva prima di uscire.")
+			machine_message.emit(Localization.text("Produzione in memoria: salva prima di uscire."))
 		else:
-			machine_message.emit("Pressa: %d balle pronte, %d lotti in coda." % [press_bales,operations.press_queue])
+			machine_message.emit(Localization.format_text("Pressa: %d balle pronte, %d lotti in coda.", [press_bales,operations.press_queue]))
 
 func discover_secret(id: String) -> bool:
 	if id in secrets_found:
@@ -583,7 +583,7 @@ func discover_secret(id: String) -> bool:
 			secrets_found.erase(id)
 			return false
 		credits_changed.emit(team_credits)
-		machine_message.emit("Curiosità scoperta: %s · +%d Bulloni!" % [definition.name, definition.reward])
+		machine_message.emit(Localization.format_text("Curiosità scoperta: %s · +%d Bulloni!", [definition.name, definition.reward]))
 		return true
 	return false
 func owns_tool(tool: int) -> bool:
@@ -627,7 +627,7 @@ func land_requirement_message() -> String:
 		return "Tutti i lotti sono già tuoi."
 	var definition: Dictionary = land_defs[yard_level]
 	if team_credits < int(definition.cost):
-		return "Servono %d Bulloni." % definition.cost
+		return Localization.text("Servono %d Bulloni.") % definition.cost
 	if not owns_tool(int(definition.get("requires_tool", 0))):
 		return "Acquista prima: " + tool_defs[int(definition.requires_tool)].name
 	for id in definition.get("project_materials", {}):
@@ -662,7 +662,7 @@ func complete_order(expected_id: String) -> bool:
 		return false
 	credits_changed.emit(team_credits)
 	deposit_changed.emit(team_credits, team_deposit_counts.duplicate())
-	machine_message.emit("Commessa completata: %s · +%d Bulloni" % [order.name, order.reward])
+	machine_message.emit(Localization.format_text("Commessa completata: %s · +%d Bulloni", [order.name, order.reward]))
 	return true
 func module_effect(id: String) -> float:
 	var level: int = int(workshop_modules.get(id, 0))
@@ -681,19 +681,21 @@ func module_requirement(id: String, include_cost: bool = true) -> String:
 	if level >= definition.levels.size():
 		return "Modulo completo."
 	if completed_orders.size() < int(definition.levels[level].orders):
-		return "Completa %d commesse (%d/%d)." % [definition.levels[level].orders, completed_orders.size(), definition.levels[level].orders]
+		return Localization.format_text("Completa %d commesse (%d/%d).", [definition.levels[level].orders, completed_orders.size(), definition.levels[level].orders])
 	if int(operations.deliveries)<int(definition.levels[level].get("deliveries",0)):
-		return "Completa %d forniture (%d/%d)." % [definition.levels[level].deliveries,operations.deliveries,definition.levels[level].deliveries]
+		return Localization.format_text("Completa %d forniture (%d/%d).", [definition.levels[level].deliveries,operations.deliveries,definition.levels[level].deliveries])
 	if definition.requires == "buggy" and vehicle_level < 2:
 		return "Acquista il buggy al garage."
 	if definition.requires == "vehicle" and vehicle_level == 0:
 		return "Acquista un mezzo al garage."
 	if definition.requires == "tool" and not owns_tool(1):
 		return "Acquista il cacciavite."
+	if definition.requires == "industrial" and not ["forklift","crane","loader"].any(func(kind):return preload("res://scripts/economy/extra_mobility.gd").owned(kind)):
+		return "Acquista un muletto, una gru o una minipala."
 	if definition.requires == "press" and not press_owned:
 		return "Installa la pressa."
 	if include_cost and team_credits < int(definition.levels[level].cost):
-		return "Servono %d Bulloni." % definition.levels[level].cost
+		return Localization.text("Servono %d Bulloni.") % definition.levels[level].cost
 	return ""
 
 func purchase_module(id: String) -> bool:
@@ -709,7 +711,7 @@ func purchase_module(id: String) -> bool:
 	credits_changed.emit(team_credits)
 	upgrade_purchased.emit(id, level + 1)
 	operations_changed.emit()
-	machine_message.emit("%s · livello %d installato." % [module_defs[id].name, level + 1])
+	machine_message.emit(Localization.format_text("%s · livello %d installato.", [module_defs[id].name, level + 1]))
 	return true
 
 func order_requirement() -> String:

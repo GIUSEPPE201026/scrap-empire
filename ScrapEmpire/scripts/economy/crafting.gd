@@ -1,7 +1,7 @@
 extends RefCounted
 ## Crafting uses free warehouse materials and working recovered components only.
 var state
-const DEPLOYABLES=["handcart","work_lamp","field_depot","yard_wall","yard_canopy","yard_platform"]
+const DEPLOYABLES=["handcart","work_lamp","field_depot","yard_wall","yard_canopy","yard_platform","bale_pallet"]
 
 func _init(game) -> void:
 	state = game
@@ -152,7 +152,7 @@ func deploy(kind: String, point: Vector3, yaw: float, up: Vector3=Vector3.UP) ->
 	return state.ops._finish(before)
 
 func pack(id: String) -> bool:
-	if not data().objects.has(id) or not data().objects[id].cargo.is_empty():
+	if not data().objects.has(id) or not data().objects[id].get("hitch","").is_empty() or not data().objects[id].cargo.is_empty() or int(data().objects[id].get("bales",0))>0:
 		return false
 	var before: Dictionary = state.serialize().duplicate(true)
 	var kind: String = data().objects[id].kind
@@ -175,13 +175,33 @@ func cart_mass(id: String) -> float:
 		result += int(data().objects[id].cargo[material])*float(state.material_defs[material].mass_kg)
 	return result
 
+func set_hitch(id: String, vehicle: String, point: Variant=null, yaw: float=0) -> bool:
+	if not data().objects.has(id) or data().objects[id].kind!="handcart" or vehicle not in ["","buggy","dirtbike"]: return false
+	if vehicle=="buggy" and state.vehicle_level<2: return false
+	if vehicle=="dirtbike" and not preload("res://scripts/economy/extra_mobility.gd").owned("dirtbike"): return false
+	if not vehicle.is_empty():
+		if cart_mass(id)>float(definitions().handcart.towing[vehicle].capacity_kg): return false
+		for other in data().objects:
+			if other!=id and not data().objects[other].get("hitch","").is_empty(): return false
+	if point!=null and (not point is Vector3 or not point.is_finite() or maxf(absf(point.x),absf(point.z))>650 or absf(point.y)>100 or not is_finite(yaw)): return false
+	var before: Dictionary=state.serialize().duplicate(true)
+	if point!=null:
+		data().objects[id].position=[point.x,point.y,point.z]
+		data().objects[id].yaw=wrapf(yaw,-PI,PI)
+		data().objects[id].erase("up")
+	if vehicle.is_empty(): data().objects[id].erase("hitch")
+	else: data().objects[id].hitch=vehicle
+	return state.ops._finish(before)
+
 func load_cart(id: String) -> bool:
 	if not data().objects.has(id) or data().objects[id].kind!="handcart" or not state.player_inventories.has(1):
 		return false
 	var mass: float = 0
 	for material in state.player_inventories[1]:
 		mass += int(state.player_inventories[1][material])*float(state.material_defs[material].mass_kg)
-	if mass<=0 or mass+cart_mass(id)>float(definitions().handcart.capacity_kg):
+	var hitch: String=data().objects[id].get("hitch","")
+	var capacity: float=float(definitions().handcart.capacity_kg) if hitch.is_empty() else float(definitions().handcart.towing[hitch].capacity_kg)
+	if mass<=0 or mass+cart_mass(id)>capacity:
 		return false
 	var before: Dictionary = state.serialize().duplicate(true)
 	var bags: Dictionary = state.player_inventories.duplicate(true)
@@ -212,7 +232,7 @@ func repair(id: String) -> bool:
 	state.operations.stored_parts[index].quality = 1
 	return state.ops._finish(before)
 
-static func validate(value: Variant, game, elapsed: float = 0, community: bool = false, assembly_level: int = 0) -> bool:
+static func validate(value: Variant, game, elapsed: float = 0, community: bool = false, assembly_level: int = 0, save: Dictionary = {}) -> bool:
 	if not value is Dictionary or not value.get("stock") is Dictionary or not value.get("objects") is Dictionary or value.objects.size()>32:
 		return false
 	if not preload("res://scripts/economy/fabrication.gd").validate(value.get("queue",[]),game,value,assembly_level):
@@ -228,6 +248,7 @@ static func validate(value: Variant, game, elapsed: float = 0, community: bool =
 		if customer.is_empty() or not sales[id] is Dictionary or not SaveService._valid_count(sales[id].get("day")) or not SaveService._valid_count(sales[id].get("units")) or int(sales[id].units)>int(customer.daily_units)+int(community) or int(sales[id].day)>int(elapsed/float(game.logistics_def.day_seconds)):
 			return false
 	var totals: Dictionary = {}
+	var hitches: int=0
 	for kind in value.stock:
 		if not game.logistics_def.crafting.has(kind) or not SaveService._valid_count(value.stock[kind]):
 			return false
@@ -248,17 +269,51 @@ static func validate(value: Variant, game, elapsed: float = 0, community: bool =
 			if not (coordinate is int or coordinate is float) or not is_finite(float(coordinate)) or absf(coordinate)>650:
 				return false
 		var mass: float = 0
+		if not SaveService._valid_count(item.get("bales",0)): return false
+		if int(item.get("bales",0))>0 and (item.kind!="bale_pallet" or int(item.bales)>int(game.logistics_def.crafting.bale_pallet.capacity_bales)): return false
 		for material in item.cargo:
 			if not game.material_defs.has(material) or not SaveService._valid_count(item.cargo[material]):
 				return false
 			mass += int(item.cargo[material])*float(game.material_defs[material].mass_kg)
 		if item.kind!="handcart" and not item.cargo.is_empty() or mass>float(game.logistics_def.crafting.handcart.capacity_kg):
 			return false
+		if item.has("hitch"):
+			if not item.hitch is String or item.hitch not in ["buggy","dirtbike"] or item.kind!="handcart": return false
+			if mass>float(game.logistics_def.crafting.handcart.towing[item.hitch].capacity_kg): return false
+			if not save.is_empty():
+				if item.hitch=="buggy" and int(save.get("vehicle_level",0))<2: return false
+				if item.hitch=="dirtbike" and "dirtbike" not in save.get("operations",{}).get("mobility",{}).get("owned",[]): return false
+			hitches+=1
+			if hitches>1: return false
 		totals[item.kind] = int(totals.get(item.kind,0))+1
 	for kind in totals:
 		if totals[kind]>int(game.logistics_def.crafting[kind].limit):
 			return false
 	return true
+
+func transfer_bales(id: String, load_pallet: bool) -> bool:
+	if not data().objects.has(id) or data().objects[id].kind!="bale_pallet": return false
+	var item: Dictionary=data().objects[id]
+	var stored: int=int(item.get("bales",0))
+	var amount: int=mini(state.press_bales,int(definitions().bale_pallet.capacity_bales)-stored) if load_pallet else stored
+	if amount<=0: return false
+	var before: Dictionary=state.serialize().duplicate(true)
+	item.bales=stored+amount if load_pallet else 0
+	state.press_bales+= -amount if load_pallet else amount
+	return state.ops._finish(before)
+
+func ship_pallet(id: String, ticket: int) -> bool:
+	if ticket!=int(state.operations.serial) or not data().objects.has(id) or data().objects[id].kind!="bale_pallet": return false
+	var count: int=int(data().objects[id].get("bales",0))
+	if count<=0: return false
+	var before: Dictionary=state.serialize().duplicate(true)
+	data().objects[id].bales=0
+	state.team_credits+=count*state.get_bale_value()
+	var driver=state.get_tree().get_first_node_in_group("players")
+	if driver!=null and is_instance_valid(driver._mounted_vehicle) and driver._mounted_vehicle.vehicle_kind=="forklift" and is_instance_valid(driver._mounted_vehicle.carried) and driver._mounted_vehicle.carried.craft_id==id and preload("res://scripts/gameplay/forklift_terminal.gd").station(driver._mounted_vehicle,driver)=="dispatch":
+		preload("res://scripts/economy/industrial_jobs.gd").record("forklift",count)
+	state.operations.serial+=1
+	return state.ops._finish(before)
 
 func customer(id: String) -> Dictionary:
 	for spec in state.logistics_def.customers:

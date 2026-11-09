@@ -3,9 +3,16 @@ extends RefCounted
 static func resolve(player) -> Dictionary:
 	if player._vehicle_exit_time>0: return {"kind":"none"}
 	if is_instance_valid(player._mounted_vehicle):
-		return {"kind":"dismount","node":player._mounted_vehicle,"anchor":player._mounted_vehicle.global_position+Vector3.UP*2.8}
+		if is_instance_valid(player._towed_cart) and not is_instance_valid(player._towed_cart.tow_vehicle):
+			return {"kind":"uncouple","node":player._towed_cart,"anchor":player._towed_cart.global_position+Vector3.UP}
+		return {"kind":"dismount","node":player._mounted_vehicle,"anchor":player.global_position+Vector3.UP*2.8}
+	var hitch: Dictionary=preload("res://scripts/gameplay/cart_hitch.gd").candidate(player)
+	if not hitch.is_empty(): return hitch
 	if is_instance_valid(player._towed_cart):
-		return {"kind":"uncouple","node":player._towed_cart,"anchor":player._towed_cart.global_position+Vector3.UP}
+		var vehicle=player._nearest_vehicle()
+		if vehicle!=null and vehicle.level in [2,3] and (not is_instance_valid(player._towed_cart.tow_vehicle) or player._towed_cart.tow_vehicle==vehicle):
+			return {"kind":"vehicle","node":vehicle,"anchor":vehicle.to_global(Vector3(0,1.45,0.15))}
+		if not is_instance_valid(player._towed_cart.tow_vehicle): return {"kind":"uncouple","node":player._towed_cart,"anchor":player._towed_cart.global_position+Vector3.UP}
 	if not GameState.operations.held.is_empty():
 		return {"kind":"carry","anchor":player.camera.global_position-player.camera.global_basis.z*1.5+Vector3.UP*0.4}
 	var candidates: Array[Dictionary] = []

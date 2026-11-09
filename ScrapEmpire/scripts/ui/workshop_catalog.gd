@@ -29,7 +29,7 @@ static func open(player: Node, selection: String) -> void:
 	var queue=Button.new()
 	queue.icon=ART.SYMBOLS.icon("clock")
 	queue.pressed.connect(player._open_fabrication_queue)
-	UI.action(queue,"Coda · %d" % GameState.fabrication.jobs().size())
+	UI.action(queue,Localization.text("Coda · %d") % GameState.fabrication.jobs().size())
 	categories.add_child(queue)
 	var gear=Button.new()
 	gear.icon=ART.SYMBOLS.icon("bag")
@@ -68,7 +68,7 @@ static func open(player: Node, selection: String) -> void:
 		var buyer=HBoxContainer.new()
 		buyer.add_theme_constant_override("separation",8)
 		detail.add_child(buyer)
-		var price=ART.label(customer.name.get_slice(" · ",0)+" · %d Bulloni" % customer.price,14,UI.ORANGE)
+		var price=ART.label(customer.name.get_slice(" · ",0)+Localization.text(" · %d Bulloni") % customer.price,14,UI.ORANGE)
 		price.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		buyer.add_child(price)
 		var route=Button.new()
@@ -82,7 +82,7 @@ static func open(player: Node, selection: String) -> void:
 	for part in recipe.parts:
 		ART.ingredient(detail,GameState.part_defs[part].name,GameState.ops.usable_parts(part),recipe.parts[part],true)
 	if float(recipe.get("seconds",0))>0:
-		detail.add_child(ART.label("%.0f s · assemblaggio" % GameState.fabrication.duration(selection),14,UI.MUTED))
+		detail.add_child(ART.label(Localization.text("%.0f s · assemblaggio") % GameState.fabrication.duration(selection),14,UI.MUTED))
 	var requirement: Dictionary=GameState.crafting.next_requirement(selection)
 	if not GameState.crafting.can_craft(selection):
 		var note=ART.label(requirement.get("title","Requisiti mancanti"),14,UI.ORANGE)

@@ -77,14 +77,14 @@ func _on_state_changed(state_name: String) -> void:
 
 func _on_handshake_result(success: bool, reason: String) -> void:
 	if not success:
-		_show_error("Handshake fallito: %s" % reason)
+		_show_error(Localization.text("Handshake fallito: %s") % reason)
 		call_deferred("_delayed_return_to_menu")
 
 func _on_mission_starting() -> void:
 	get_tree().change_scene_to_file("res://scenes/sector.tscn")
 
 func _on_mission_ended(reason: String) -> void:
-	_show_error("Missione terminata: %s" % reason)
+	_show_error(Localization.text("Missione terminata: %s") % reason)
 	call_deferred("_delayed_return_to_menu")
 
 func _delayed_return_to_menu() -> void:

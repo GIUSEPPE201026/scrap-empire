@@ -46,7 +46,7 @@ func _process(delta: float) -> void:
 	if not is_instance_valid(player): return
 	for id in SITES:
 		if player.global_position.distance_to(point(id))<27 and GameState.ops.visit_site(id):
-			GameState.machine_message.emit("Luogo scoperto: "+SITES[id].name+" · segnato sulla mappa")
+			GameState.machine_message.emit(Localization.text("Luogo scoperto: ")+SITES[id].name+Localization.text(" · segnato sulla mappa"))
 
 func solid(parent: Node3D, dimensions: Vector3, at: Vector3, color: Color, yaw: float=0, draw: bool=true) -> Node3D:
 	var body=StaticBody3D.new()

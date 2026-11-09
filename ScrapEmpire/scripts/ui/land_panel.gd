@@ -10,14 +10,14 @@ static func open(player: Node) -> void:
 	player._panel_box.add_child(row)
 	var preview=UI.column(row,310)
 	UI.picture(preview,"land",Vector2(270,160))
-	preview.add_child(ART.label("TERRENO / %d DI 2" % GameState.yard_level,21,UI.PAPER))
+	preview.add_child(ART.label(Localization.text("TERRENO / %d DI 2") % GameState.yard_level,21,UI.PAPER))
 	preview.add_child(ART.label("+24 rottami · 3 cumuli",16,UI.ORANGE))
 	preview.add_child(ART.label("2 smontaggi · scarico satellite",14,UI.MUTED))
 	var detail=UI.column(row,350)
 	if GameState.yard_level<GameState.land_defs.size():
 		var land: Dictionary=GameState.land_defs[GameState.yard_level]
 		detail.add_child(ART.label("LOTTO EST" if GameState.yard_level==0 else "LOTTO DUNE",25,UI.PAPER))
-		detail.add_child(ART.label("%d Bulloni" % land.cost,23,UI.ORANGE))
+		detail.add_child(ART.label(Localization.text("%d Bulloni") % land.cost,23,UI.ORANGE))
 		var tool=HBoxContainer.new()
 		detail.add_child(tool)
 		UI.picture(tool,"screwdriver" if int(land.requires_tool)==1 else "hammer",Vector2(44,44))

@@ -14,7 +14,7 @@ static func elapsed() -> float:
 
 static func caption() -> String:
 	var hour: float = fmod(8.0+elapsed()/duration()*24.0,24.0)
-	return "GIORNO %d · %02d:%02d" % [1+int(elapsed()/duration()),int(hour),int(fmod(hour*60,60))]
+	return Localization.format_text("GIORNO %d · %02d:%02d", [1+int(elapsed()/duration()),int(hour),int(fmod(hour*60,60))])
 
 func _process(delta: float) -> void:
 	if GameState.mission_phase != "MISSIONE":

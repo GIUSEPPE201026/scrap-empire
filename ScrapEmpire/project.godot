@@ -11,11 +11,13 @@ config_version=5
 [application]
 
 config/name="ScrapEmpire"
+config/version="0.2.0"
 run/main_scene="res://scenes/boot.tscn"
 config/features=PackedStringArray("4.3")
 
 [autoload]
 
+Localization="*res://scripts/ui/localization.gd"
 SessionState="*res://scripts/core/session_state.gd"
 GameState="*res://scripts/core/game_state.gd"
 CommandService="*res://scripts/core/command_service.gd"
@@ -39,6 +41,12 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
 [input]
+
+vehicle_drift={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":4194326)]
+}
+
 
 move_forward={
 "deadzone": 0.5,

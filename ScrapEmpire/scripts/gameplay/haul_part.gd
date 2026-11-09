@@ -14,7 +14,7 @@ func _ready() -> void:
 		build_model(self,kind,quality)
 
 func display_name() -> String:
-	return "%s · %d kg · %s" % [GameState.part_defs[kind].name,GameState.part_defs[kind].mass_kg,"FUNZIONANTE" if quality == 1 else "DA RIPARARE"]
+	return Localization.format_text("%s · %d kg · %s", [GameState.part_defs[kind].name,GameState.part_defs[kind].mass_kg,"FUNZIONANTE" if quality == 1 else "DA RIPARARE"])
 
 static func build_model(root: Node3D, type: String, condition: int) -> void:
 	var art = preload("res://scripts/gameplay/scrapyard_art.gd").new()

@@ -33,13 +33,13 @@ static func open(player: Node, material: String="") -> void:
 	body.add_child(side)
 	UI.hero(side,selected,Vector2(320,112))
 	side.add_child(ART.label(NAMES[selected].to_upper(),24,UI.PAPER))
-	side.add_child(ART.label("%.1f kg / pezzo  ·  %d Bulloni / pezzo" % [GameState.material_defs[selected].mass_kg,GameState.material_defs[selected].credits],14,UI.MUTED))
+	side.add_child(ART.label(Localization.format_text("%.1f kg / pezzo  ·  %d Bulloni / pezzo", [GameState.material_defs[selected].mass_kg,GameState.material_defs[selected].credits]),14,UI.MUTED))
 	for source in ["bag","deposit"]:
 		var row=HBoxContainer.new()
 		row.add_theme_constant_override("separation",12)
 		side.add_child(row)
 		var quantity: int=int(player.get_inventory().get(selected,0)) if source=="bag" else int(GameState.team_deposit_counts.get(selected,0))
-		var caption=ART.label(("Sacca" if source=="bag" else "Deposito")+"  ×%d" % quantity,18,UI.PAPER)
+		var caption=ART.label(Localization.text("Sacca" if source=="bag" else "Deposito")+"  ×%d" % quantity,18,UI.PAPER)
 		caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		row.add_child(caption)
 		var sell=Button.new()
@@ -49,7 +49,7 @@ static func open(player: Node, material: String="") -> void:
 		sell.set_meta("source",source)
 		sell.pressed.connect(player._sell_one.bind(selected,source))
 		UI.action(sell,"Vendi 1",not sell.disabled)
-		sell.tooltip_text="Vendi 1 %s dalla %s per %d Bulloni" % [NAMES[selected],"sacca" if source=="bag" else "scorta",GameState.material_defs[selected].credits]
+		sell.tooltip_text=Localization.format_text("Vendi 1 %s dalla %s per %d Bulloni", [Localization.text(NAMES[selected]),Localization.text("Sacca" if source=="bag" else "Deposito"),GameState.material_defs[selected].credits])
 		row.add_child(sell)
 	var note=ART.label("Vendita singola · solo alla bilancia",13,UI.MUTED)
 	side.add_child(note)

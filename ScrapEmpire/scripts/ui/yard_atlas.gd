@@ -60,7 +60,7 @@ func _draw() -> void:
 	draw_line(map_point(Vector3(0,0,70)),map_point(Vector3(0,0,230)),Color("#9b8a5a"),3)
 	var font = get_theme_default_font()
 	draw_string(font,Vector2(20,30),"N ↑  /  RIVA SECCA",HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color("#e7c479"))
-	draw_string(font,Vector2(20,size.y-18),"CENTRO / SERVIZI" if bounds.size.x<200 else "DESERTO · 4 VARCHI · 1,3 km",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#c6c5ab"))
+	draw_string(font,Vector2(20,size.y-18),Localization.text("CENTRO / SERVIZI" if bounds.size.x<200 else "DESERTO · 4 VARCHI · 1,3 km"),HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("#c6c5ab"))
 	var occupied: Array[Rect2]=[]
 	for id in locations:
 		if id=="customer" or id=="salvage":
@@ -70,7 +70,7 @@ func _draw() -> void:
 		draw_circle(location,5 if id==selected else 3.5,color)
 		if bounds.size.x>200 and id in ["depot","oasis","dune_park","crash","cave","anomaly","north_cache","east_cache","west_cache"]:
 			var caption: String={"depot":"SCRAPYARD","oasis":"OASI","dune_park":"DUNE PARK","crash":"VOLO 76","cave":"GROTTA","anomaly":"SEGNALE"}.get(id,locations[id].name.get_slice(" / ",0))
-			caption=caption.left(20)
+			caption=Localization.text(caption).left(20)
 			var text_size=font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
 			var label_at=location+Vector2(7,-6)
 			for attempt in 5:
@@ -85,7 +85,7 @@ func _draw() -> void:
 		var direction = Vector2(-sin(player.rotation.y),-cos(player.rotation.y))
 		draw_circle(at,10,Color("#202321"))
 		draw_colored_polygon(PackedVector2Array([at+direction*11,at+direction.rotated(2.4)*8,at+direction.rotated(-2.4)*8]),Color.WHITE)
-		draw_string(font,at+Vector2(13,18),"TU",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color.WHITE)
+		draw_string(font,at+Vector2(13,18),Localization.text("TU"),HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color.WHITE)
 		if not player._navigation_label.is_empty():
 			var destination: Vector2 = map_point(player._navigation_target)
 			draw_line(at,destination,Color("#d9b25b"),1.5)

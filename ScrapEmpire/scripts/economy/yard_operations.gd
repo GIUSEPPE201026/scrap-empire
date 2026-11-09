@@ -54,7 +54,7 @@ func _finish(before: Dictionary, bags: Dictionary = {}) -> bool:
 		state.deserialize(before)
 		if not bags.is_empty():
 			state.player_inventories = bags
-		state.machine_message.emit("Operazione annullata: checkpoint non riuscito.")
+		state.machine_message.emit(Localization.text("Operazione annullata: checkpoint non riuscito."))
 		return false
 	if state.player_inventories.has(1):
 		state.inventory_changed.emit(1,state.player_inventories[1].duplicate())
@@ -66,15 +66,20 @@ func _finish(before: Dictionary, bags: Dictionary = {}) -> bool:
 func begin_expedition(fresh: bool = false) -> bool:
 	if not fresh and int(state.operations.epoch) > 0:
 		return true
+	if fresh:
+		for item in state.crafting.data().objects.values():
+			if not item.get("hitch","").is_empty():
+				state.machine_message.emit(Localization.text("Sgancia il carrello prima di iniziare una nuova spedizione."))
+				return false
 	if fresh and not state.operations.held.is_empty():
 		return false
 	if fresh and cargo_mass()>0:
-		state.machine_message.emit("Scarica il cassone prima di rinnovare il settore.")
+		state.machine_message.emit(Localization.text("Scarica il cassone prima di rinnovare il settore."))
 		return false
 	if fresh:
 		for item in state.operations.field.values():
 			if item.get("dropped",false):
-				state.machine_message.emit("Recupera il componente lasciato a terra prima di rinnovare il settore.")
+				state.machine_message.emit(Localization.text("Recupera il componente lasciato a terra prima di rinnovare il settore."))
 				return false
 	var before: Dictionary = state.serialize().duplicate(true)
 	state.operations.epoch += 1
@@ -277,7 +282,7 @@ func component_requirement(entity: String, definition: String, index: int, tool:
 	if state.yard_level < int(step.land):
 		return "PROGETTO NECESSARIO\nApri il Lotto Est."
 	if not state.owns_tool(tool) or tool != int(step.tool):
-		return "Serve %s [%d]." % [state.tool_defs[int(step.tool)].name,int(state.tool_defs[int(step.tool)].key)]
+		return Localization.format_text("Serve %s [%d].", [state.tool_defs[int(step.tool)].name,int(state.tool_defs[int(step.tool)].key)])
 	if intact:
 		if not state.operations.held.is_empty():
 			return "Carica o deposita il componente che stai trasportando."
@@ -478,7 +483,8 @@ static func validate(data: Variant, game, save: Dictionary) -> bool:
 		return false
 	if data.has("career") and not preload("res://scripts/economy/career.gd").validate(data.career,game,save):
 		return false
-	if data.has("crafting") and not preload("res://scripts/economy/crafting.gd").validate(data.crafting,game,float(data.get("world_seconds",0)), "community" in data.get("career",{}).get("claimed",[]),int(save.get("workshop_modules",{}).get("assembly",0))):
+	if data.has("industrial_jobs") and not preload("res://scripts/economy/industrial_jobs.gd").validate(data.industrial_jobs,save): return false
+	if data.has("crafting") and not preload("res://scripts/economy/crafting.gd").validate(data.crafting,game,float(data.get("world_seconds",0)), "community" in data.get("career",{}).get("claimed",[]),int(save.get("workshop_modules",{}).get("assembly",0)),save):
 		return false
 	for job in data.get("crafting",{}).get("queue",[]):
 		if not SaveService._valid_count(data.get("serial")) or job.id.get_slice("_",1).to_int()>int(data.serial):

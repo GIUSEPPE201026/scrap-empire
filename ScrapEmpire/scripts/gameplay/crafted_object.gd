@@ -2,12 +2,44 @@ extends CharacterBody3D
 var craft_id: String = ""
 var kind: String = ""
 var towing: Node3D
+var tow_vehicle: Node3D
+var hitch_line: MeshInstance3D
 var wheels: Array[Node3D] = []
 var load_visual: Node3D
 var load_signature: String = ""
 
+func _refresh_pallet() -> void:
+	var bales: int=int(GameState.crafting.data().objects.get(craft_id,{}).get("bales",0))
+	for child in get_children():
+		if child is CollisionShape3D:
+			child.shape.size.y=0.22+ceilf(bales/2.0)*0.48
+			child.position.y=child.shape.size.y/2.0
+	if DisplayServer.get_name()=="headless": return
+	if is_instance_valid(load_visual):
+		remove_child(load_visual)
+		load_visual.queue_free()
+	load_visual=Node3D.new()
+	add_child(load_visual)
+	var art=preload("res://scripts/gameplay/scrapyard_art.gd").new()
+	for side in [-1,1]: art.box(load_visual,Vector3(0.16,0.12,1.2),Vector3(side*0.5,0.06,0),Color("#775333"))
+	for index in 5: art.beveled_box(load_visual,Vector3(1.4,0.08,0.20),Vector3(0,0.16,-0.48+index*0.24),Color("#aa8051"))
+	var amount: int=int(GameState.crafting.data().objects.get(craft_id,{}).get("bales",0))
+	for index in amount:
+		var at=Vector3((index%2)*0.66-0.33,0.45+(index/2)*0.48,0)
+		art.beveled_box(load_visual,Vector3(0.61,0.44,0.95),at,art.STEEL,true)
+		for z in [-0.25,0.25]: art.box(load_visual,Vector3(0.63,0.46,0.035),at+Vector3(0,0,z),art.GRAPHITE)
+
 func _ready() -> void:
 	add_to_group("crafted_objects")
+	if kind=="bale_pallet":
+		var pallet_shape=CollisionShape3D.new()
+		pallet_shape.shape=BoxShape3D.new()
+		pallet_shape.shape.size=Vector3(1.4,0.22,1.2)
+		pallet_shape.position.y=0.11
+		add_child(pallet_shape)
+		_refresh_pallet()
+		GameState.operations_changed.connect(_refresh_pallet)
+		return
 	if kind=="field_depot":
 		add_to_group("field_depot")
 	collision_layer = 1
@@ -55,15 +87,37 @@ func _ready() -> void:
 		bubble.material_override = glow
 
 func _physics_process(delta: float) -> void:
+	if is_instance_valid(hitch_line): hitch_line.visible=is_instance_valid(tow_vehicle)
 	if not is_instance_valid(towing):
 		return
-	if is_instance_valid(towing._mounted_vehicle) or not towing._game_state.operations.held.is_empty() or global_position.distance_to(towing.global_position)>4:
+	var motorized: bool=preload("res://scripts/gameplay/cart_hitch.gd").supported(tow_vehicle)
+	var driver: Node3D=towing if motorized and towing._mounted_vehicle==tow_vehicle else tow_vehicle
+	var origin: Vector3=driver.global_position if motorized else towing.global_position
+	var basis_yaw: Basis=driver.global_basis if motorized else towing.global_basis
+	if motorized and DisplayServer.get_name()!="headless":
+		if not is_instance_valid(hitch_line):
+			hitch_line=MeshInstance3D.new()
+			var tube=CylinderMesh.new()
+			tube.top_radius=0.035
+			tube.bottom_radius=0.035
+			tube.height=1
+			hitch_line.mesh=tube
+			var material=StandardMaterial3D.new()
+			material.albedo_color=Color("#b0b7b3")
+			hitch_line.material_override=material
+			add_child(hitch_line)
+		var from: Vector3=to_global(Vector3(0,1,-1.55))
+		var to: Vector3=preload("res://scripts/gameplay/cart_hitch.gd").point(tow_vehicle,towing)
+		var axis: Vector3=to-from
+		if axis.length()>0.001: hitch_line.global_transform=Transform3D(Basis(Quaternion(Vector3.UP,axis.normalized())).scaled(Vector3(1,axis.length(),1)),(to+from)*0.5)
+	if (is_instance_valid(towing._mounted_vehicle) and not motorized) or (not motorized and not towing._game_state.operations.held.is_empty()) or global_position.distance_to(origin)>(7.0 if motorized else 4.0):
 		towing._stop_cart()
 		return
-	var target: Vector3 = towing.global_position+towing.global_basis.z*1.65
+	var distance: float=float(GameState.logistics_def.crafting.handcart.towing[tow_vehicle.vehicle_kind].distance) if motorized else 1.65
+	var target: Vector3 = origin+basis_yaw.z*distance
 	var offset: Vector3 = target-global_position
 	offset.y = 0
-	var speed: float = minf(offset.length()*4,float(GameState.logistics_def.crafting.handcart.tow_speed_mps)+0.5)
+	var speed: float = minf(offset.length()*4,15.0 if motorized else float(GameState.logistics_def.crafting.handcart.tow_speed_mps)+0.5)
 	var direction: Vector3 = offset.normalized()
 	velocity.x = direction.x*speed
 	velocity.z = direction.z*speed

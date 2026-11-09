@@ -63,11 +63,11 @@ func _update_visuals() -> void:
 	bale.visible = GameState.press_owned and (running or GameState.press_bales > 0)
 	bale.scale.y = 1.0 - sin(progress * PI) * 0.55 if running else 0.45
 	if not GameState.press_owned:
-		status_label.text = "P-01\n%d BULLONI" % int(GameState.press_def.cost)
+		status_label.text = Localization.text("P-01\n%d BULLONI") % int(GameState.press_def.cost)
 	elif running:
-		status_label.text = "CICLO\n%.1f s" % GameState.press_remaining
+		status_label.text = Localization.text("CICLO\n%.1f s") % GameState.press_remaining
 	else:
-		status_label.text = "PRONTA\n%d BALLE" % GameState.press_bales
+		status_label.text = Localization.text("PRONTA\n%d BALLE") % GameState.press_bales
 	if _last_owned != GameState.press_owned:
 		_last_owned = GameState.press_owned
 		modulate_machine(GameState.press_owned)

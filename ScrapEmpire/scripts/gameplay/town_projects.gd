@@ -1,6 +1,6 @@
 extends Node3D
 const SQUARE = Vector3(-48,0,34)
-const PROJECTS = ["town_square","workshop_relaunch","neighborhood_gardens"]
+const PROJECTS = ["town_square","workshop_relaunch","neighborhood_gardens","oasis_power"]
 var _signature: String = ""
 var _art_root: Node3D
 
@@ -25,6 +25,28 @@ func refresh() -> void:
 	if DisplayServer.get_name()=="headless":
 		return
 	var art = preload("res://scripts/gameplay/scrapyard_art.gd").new()
+	if "oasis_power" in completed:
+		var point: Vector3=preload("res://scripts/gameplay/leisure_sites.gd").OASIS+Vector3(-22,3,-8)
+		var installation=Node3D.new()
+		installation.name="OasisPowerInstallation"
+		installation.position=point
+		_art_root.add_child(installation)
+		art.beveled_box(installation,Vector3(2.2,0.4,0.7),Vector3(0,0.2,2.4),art.GRAPHITE)
+		for index in 3:
+			var battery=Node3D.new()
+			battery.position=Vector3((index-1)*0.65,0.4,2.4)
+			installation.add_child(battery)
+			preload("res://scripts/gameplay/product_models.gd").build(battery,"battery_pack")
+		for side in [-1,1]:
+			var at=Vector3(side*4,0,0)
+			art.cylinder(installation,0.06,3.2,at+Vector3.UP*1.6,art.STEEL,16)
+			art.beveled_box(installation,Vector3(0.5,0.12,0.35),at+Vector3.UP*3.2,art.YELLOW)
+			var lamp=OmniLight3D.new()
+			lamp.position=at+Vector3.UP*3
+			lamp.omni_range=8
+			lamp.light_energy=1.2
+			lamp.light_color=Color("#ffe0b0")
+			installation.add_child(lamp)
 	if "town_square" in completed or "neighborhood_gardens" in completed:
 		art.box(_art_root,Vector3(10,0.035,8),SQUARE+Vector3(0,0.025,0),Color("#a89c82"))
 		for side in [-1,1]:

@@ -47,7 +47,7 @@ static func open(player: Node, workbench: bool, selection: String="") -> void:
 		var spec: Dictionary=GameState.part_defs[item.kind]
 		UI.picture(side,item.kind,Vector2(290,105))
 		side.add_child(ART.label(spec.name.to_upper(),21,UI.PAPER))
-		side.add_child(ART.label("%d kg · %d Bulloni" % [spec.mass_kg,GameState.ops.part_value(item)],16,UI.ORANGE))
+		side.add_child(ART.label(Localization.format_text("%d kg · %d Bulloni", [spec.mass_kg,GameState.ops.part_value(item)]),16,UI.ORANGE))
 		side.add_child(ART.label("FUNZIONANTE" if item.quality==1 else "DA RIPARARE",14,UI.MUTED))
 		if workbench:
 			var ready: bool=GameState.yard_level>=1 and int(GameState.workshop_modules.get("workbench",0))>=1

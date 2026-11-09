@@ -1,5 +1,5 @@
 extends RefCounted
-const IDS=["skateboard","dirtbike"]
+const IDS=["skateboard","dirtbike","forklift","crane","loader"]
 static func owned(id: String) -> bool:
 	return id in GameState.operations.get("mobility",{}).get("owned",[])
 
@@ -22,7 +22,7 @@ static func select_portable(id: String) -> bool:
 	return GameState.ops._finish(before)
 
 static func validate(value: Variant) -> bool:
-	if not value is Dictionary or not value.get("owned") is Array or value.owned.size()>2: return false
+	if not value is Dictionary or not value.get("owned") is Array or value.owned.size()>IDS.size(): return false
 	for id in value.owned:
 		if id not in IDS or value.owned.count(id)!=1: return false
 	return value.get("portable","scooter") in ["scooter","skateboard"] and (value.get("portable")!="skateboard" or "skateboard" in value.owned)

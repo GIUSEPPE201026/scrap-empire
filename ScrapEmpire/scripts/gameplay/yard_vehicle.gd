@@ -20,9 +20,50 @@ var _paint_index: int=-1
 var _boarding: Tween
 var _exit_ghost: Node3D
 var _exit_tween: Tween
+var _dust_emitters: Array[CPUParticles3D]=[]
+
+func update_dust(driver: CharacterBody3D, speed: float, slip: float) -> void:
+	if level!=2 or DisplayServer.get_name()=="headless": return
+	if _dust_emitters.is_empty():
+		for side in [-1,1]:
+			var dust=CPUParticles3D.new()
+			dust.emitting=false
+			dust.amount=40
+			dust.lifetime=0.8
+			dust.local_coords=false
+			dust.direction=Vector3(side*0.5,0.5,1)
+			dust.spread=35
+			dust.initial_velocity_min=1.2
+			dust.initial_velocity_max=3.2
+			dust.gravity=Vector3(0,0.4,0)
+			dust.scale_amount_min=0.12
+			dust.scale_amount_max=0.4
+			var mesh=SphereMesh.new()
+			mesh.radial_segments=8
+			mesh.rings=4
+			var material=StandardMaterial3D.new()
+			material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
+			material.albedo_color=Color(0.72,0.52,0.31,0.22)
+			mesh.material=material
+			dust.mesh=mesh
+			var gradient=Gradient.new()
+			gradient.set_color(0,Color.WHITE)
+			gradient.set_color(1,Color(1,1,1,0))
+			dust.color_ramp=gradient
+			visual.add_child(dust)
+			dust.position=Vector3(side*1.1,0.25,1.3)
+			_dust_emitters.append(dust)
+	for index in _dust_emitters.size():
+		var wheel=wheels[index*2+1]
+		var point: Vector3=wheel.get_meta("ground_point",driver.global_position)
+		var concrete: bool=maxf(absf(point.x),absf(point.z))<82 or (point.x>70 and point.x<265 and point.z>-75 and point.z<22)
+		_dust_emitters[index].emitting=not parked and driver.is_on_floor() and wheel.get_meta("grounded",false) and not concrete and speed>3 and slip>0.12
+
+func stop_dust() -> void:
+	for emitter in _dust_emitters: emitter.emitting=false
 
 func animate_entry(side: float) -> void:
-	if level!=2 or not is_instance_valid(rider): return
+	if level not in [2,3,4,5,6] or not is_instance_valid(rider): return
 	if _boarding: _boarding.kill()
 	if _exit_tween: _exit_tween.kill()
 	if is_instance_valid(_exit_ghost): _exit_ghost.queue_free()
@@ -30,12 +71,12 @@ func animate_entry(side: float) -> void:
 	rider.rotation.y=side*0.7
 	rider.seated=0.0
 	_boarding=create_tween().set_parallel(true)
-	_boarding.tween_property(rider,"position",Vector3.ZERO,0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	_boarding.tween_property(rider,"position",Vector3(0,-0.05,0) if level==3 else Vector3.ZERO,0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	_boarding.tween_property(rider,"rotation:y",0.0,0.55)
-	_boarding.tween_property(rider,"seated",1.0,0.55)
+	_boarding.tween_property(rider,"seated",0.55 if level==3 else 1.0,0.55)
 
 func animate_exit(destination: Vector3) -> void:
-	if level!=2 or not is_instance_valid(rider): return
+	if level not in [2,3,4,5,6] or not is_instance_valid(rider): return
 	if _boarding: _boarding.kill()
 	if is_instance_valid(_exit_ghost): _exit_ghost.queue_free()
 	# Independent articulated actor, not a duplicate player/collider.
@@ -44,6 +85,7 @@ func animate_exit(destination: Vector3) -> void:
 	_exit_ghost.position=rider.position
 	_exit_ghost.rotation=rider.rotation
 	_exit_ghost.seated=rider.seated
+	_exit_ghost.bike_pose=level==3
 	var target: Vector3=visual.to_local(destination)
 	_exit_tween=create_tween().set_parallel(true)
 	_exit_tween.tween_property(_exit_ghost,"position",target,0.6).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
@@ -95,6 +137,8 @@ func _ready() -> void:
 	if level==2:
 		_build_headlights()
 	var art = preload("res://scripts/gameplay/scrapyard_art.gd").new()
+	if level==2 and DisplayServer.get_name()!="headless":
+		art.box(visual,Vector3(0.15,0.12,0.65),Vector3(0,0.45,1.95),art.STEEL)
 	if level==1:
 		for axle in [-0.6,0.6]:
 			_add_wheel(Vector3(0,0.22,axle),0.22,0.16,art)
@@ -157,6 +201,7 @@ func available() -> bool:
 
 func set_parked(value: bool) -> void:
 	parked = value
+	if value: stop_dust()
 	if is_instance_valid(rider):
 		rider.visible = not value
 	body.collision_layer = 1 if value else 0
@@ -186,7 +231,7 @@ func animate_wheels(distance: float, steering: float) -> void:
 		if wheel.get_child_count()>0:
 			wheel.get_child(0).rotation.x = -distance / float(wheel.get_meta("radius"))
 func _build_rider(art) -> void:
-	if level in [1,2]:
+	if level in [1,2,4,5,6]:
 		rider=preload("res://scripts/gameplay/worker_model.gd").new()
 		rider.name="RiderBody"
 		if level==1:

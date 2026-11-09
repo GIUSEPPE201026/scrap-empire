@@ -14,6 +14,7 @@ func _ready() -> void:
 	ghost=MeshInstance3D.new()
 	ghost.mesh=BoxMesh.new()
 	ghost.mesh.size=Vector3(1.35,0.85,1.45) if kind=="handcart" else (Vector3(1.5,1.1,1.5) if kind=="field_depot" else Vector3(0.7,2,0.7))
+	if kind=="bale_pallet": ghost.mesh.size=Vector3(1.5,1.3,1.3)
 	if kind in preload("res://scripts/gameplay/yard_structures.gd").KINDS: ghost.mesh.size=preload("res://scripts/gameplay/yard_structures.gd").footprint(kind)
 	var material=StandardMaterial3D.new()
 	material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -55,11 +56,11 @@ func handle_input(event: InputEvent) -> void:
 		cancel()
 	elif event.is_action_pressed("interact") or (event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT):
 		update_preview()
-		if ground.is_empty(): player._notify("Sposta l'anteprima su terreno libero.")
+		if ground.is_empty(): player._notify(Localization.text("Sposta l'anteprima su terreno libero."))
 		elif GameState.crafting.deploy(kind,ground.point,yaw,ground.up):
-			player._notify("Posizionato · E sull'oggetto per usarlo.")
+			player._notify(Localization.text("Posizionato · E sull'oggetto per usarlo."))
 			cancel()
-		else: player._notify("Posizionamento non salvato: oggetto conservato nell'attrezzatura.")
+		else: player._notify(Localization.text("Posizionamento non salvato: oggetto conservato nell'attrezzatura."))
 	elif (event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_R) or (event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]):
 		yaw=wrapf(yaw+(-PI/4 if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_WHEEL_DOWN else PI/4),-PI,PI)
 		update_preview()

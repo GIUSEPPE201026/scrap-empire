@@ -156,8 +156,8 @@ func collection_seconds() -> float:
 func display_name() -> String:
 	var step: Dictionary = get_step()
 	if step.is_empty():
-		return "SMONTAGGIO COMPLETATO"
-	return "%s · %s\n%s" % [GameState.salvage_defs[definition_id].name,step.component_name,"RECUPERO INTERO · %d kg" % GameState.part_defs[step.part].mass_kg if recover_intact else "SEPARA MATERIALI"]
+		return Localization.text("SMONTAGGIO COMPLETATO")
+	return Localization.format_text("%s · %s\n%s", [GameState.salvage_defs[definition_id].name,step.component_name,Localization.text("RECUPERO INTERO · %d kg") % GameState.part_defs[step.part].mass_kg if recover_intact else Localization.text("SEPARA MATERIALI")])
 
 func requirement(peer: int, tool: int) -> String:
 	var step: Dictionary = get_step()

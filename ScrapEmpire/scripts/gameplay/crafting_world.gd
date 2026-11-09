@@ -35,7 +35,7 @@ func refresh() -> void:
 			object.kind = data[id].kind
 			add_child(object)
 		object.update_load(data[id].cargo)
-		if not is_instance_valid(object.towing):
+		if not is_instance_valid(object.towing) and not object.has_meta("carried_by"):
 			var pos: Array = data[id].position
 			object.position = Vector3(pos[0],pos[1],pos[2])
 			object.rotation = Vector3(0,float(data[id].yaw),0)

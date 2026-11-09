@@ -10,12 +10,13 @@ signal settings_cancelled
 
 # Settings storage
 var _settings: Dictionary = {}
-var settings_path: String = "user://settings.cfg"
+var settings_path: String = Localization.settings_path
 var _pending_keybind_action: String = ""
 var _keybind_waiting: bool = false
 var _applied_close: bool = false
 var _requested_window_mode: int=Window.MODE_WINDOWED
 var _fullscreen_check: CheckButton
+var _language_options: OptionButton
 
 # Node references (will be set in _ready)
 var _tab_container: TabContainer
@@ -65,6 +66,21 @@ func _ready() -> void:
 
 func _organize_controls() -> void:
 	var art = preload("res://scripts/ui/menu_art.gd")
+	var language_row=HBoxContainer.new()
+	language_row.custom_minimum_size.y=48
+	var language_label=Label.new()
+	language_label.text="Lingua / Language"
+	language_label.custom_minimum_size.x=150
+	language_row.add_child(language_label)
+	_language_options=OptionButton.new()
+	_language_options.name="LanguageOptions"
+	_language_options.add_item("Italiano",0)
+	_language_options.add_item("English",1)
+	_language_options.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	language_row.add_child(_language_options)
+	_tab_container.get_node("Graphics").add_child(language_row)
+	_tab_container.get_node("Graphics").move_child(language_row,0)
+	_language_options.item_selected.connect(func(index):_settings.language=["it","en"][index])
 	_fullscreen_check=CheckButton.new()
 	_fullscreen_check.text="Schermo intero · questa sessione"
 	_fullscreen_check.custom_minimum_size.y=42
@@ -187,7 +203,10 @@ func _connect_signals() -> void:
 func _load_settings() -> void:
 	_requested_window_mode=get_tree().root.mode
 	var config = ConfigFile.new()
+	_settings.language="it"
 	if config.load(settings_path) == OK:
+		var language=config.get_value("interface","language","it")
+		_settings.language=language if language is String and language in Localization.SUPPORTED else "it"
 		_settings.graphics_quality = config.get_value("graphics", "quality", 2)
 		_settings.vsync = config.get_value("graphics", "vsync", 1)
 		_settings.fov = config.get_value("graphics", "fov", 80.0)
@@ -238,6 +257,7 @@ func _load_settings() -> void:
 func _save_settings() -> bool:
 	var config = ConfigFile.new()
 	config.load(settings_path)
+	config.set_value("interface","language",_settings.language)
 	config.set_value("graphics", "quality", _settings.graphics_quality)
 	config.set_value("graphics", "vsync", _settings.vsync)
 	config.set_value("graphics", "fov", _settings.fov)
@@ -257,6 +277,7 @@ func _save_settings() -> bool:
 	return config.save(settings_path) == OK
 
 func _populate_dialog() -> void:
+	_language_options.select(1 if _settings.language=="en" else 0)
 	_fullscreen_check.set_pressed_no_signal(_requested_window_mode in [Window.MODE_FULLSCREEN,Window.MODE_EXCLUSIVE_FULLSCREEN])
 	# Setup dropdown options
 	_setup_dropdowns()
@@ -304,6 +325,10 @@ func _setup_dropdowns() -> void:
 	_vsync_options.add_item("Adattivo")
 
 func _apply_settings_to_engine() -> void:
+	Localization.set_language(_settings.language)
+	_tab_container.set_tab_title(0,Localization.text("GRAFICA"))
+	_tab_container.set_tab_title(1,Localization.text("AUDIO"))
+	_tab_container.set_tab_title(2,Localization.text("COMANDI"))
 	get_tree().root.msaa_3d = int(_settings.graphics_quality)
 	# Apply graphics settings
 	# FOV will be applied when player spawns
@@ -566,6 +591,7 @@ func _on_closed() -> void:
 func _on_reset_defaults() -> void:
 	_cancel_keybind()
 	_requested_window_mode=Window.MODE_WINDOWED
+	_settings.language="it"
 	_settings.graphics_quality = 2
 	_settings.vsync = 1
 	_settings.fov = 80.0
@@ -675,7 +701,7 @@ func _input(event: InputEvent) -> void:
 		if key_name:
 			for action in ["move_forward", "move_back", "move_left", "move_right", "jump", "sprint", "interact", "recovery_mode"]:
 				if action != _pending_keybind_action and _settings["key_" + action] == key_name:
-					_get_keybind_button(_pending_keybind_action).text = "Gia usato: " + key_name
+					_get_keybind_button(_pending_keybind_action).text = Localization.text("Gia usato: ") + Localization.text(key_name)
 					return
 			if event.keycode in [KEY_TAB, KEY_I, KEY_1, KEY_2, KEY_3, KEY_4]:
 				_get_keybind_button(_pending_keybind_action).text = "Tasto riservato"

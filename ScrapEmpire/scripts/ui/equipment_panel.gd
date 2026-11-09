@@ -82,6 +82,13 @@ static func open(player: Node) -> void:
 	meter.show_percentage=false
 	weight.add_child(meter)
 	var utilities=HBoxContainer.new()
+	var vacuum=Button.new()
+	vacuum.icon=ART.SYMBOLS.icon("vacuum")
+	UI.action(vacuum,"Aspiratore",player._vacuum_active)
+	vacuum.disabled=int(GameState.workshop_modules.get("vacuum",0))<1 or is_instance_valid(player._mounted_vehicle)
+	vacuum.tooltip_text="Acquista al monitor officina. Scarti leggeri nella sacca."
+	vacuum.pressed.connect(player._toggle_vacuum)
+	utilities.add_child(vacuum)
 	utilities.add_theme_constant_override("separation",8)
 	player._panel_box.add_child(utilities)
 	var entries: Array=[["Scanner [F]" if player._shortcut_free(KEY_F) else "Scanner","scan",player._scan_scrap,int(GameState.workshop_modules.get("scanner",0))>0],["Luce [L]" if player._shortcut_free(KEY_L) else "Luce","light",player._toggle_work_light,int(GameState.workshop_modules.get("headlamp",0))>0 or (is_instance_valid(player._mounted_vehicle) and player._mounted_vehicle.level==2)],["Collezione [B]" if player._shortcut_free(KEY_B) else "Collezione","book",player._open_scrap_book,true],["Costruzioni","craft",player._open_crafted_gear,true]]

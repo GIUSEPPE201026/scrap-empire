@@ -66,7 +66,11 @@ func save_checkpoint(slot: int = 0, automatic: bool = false) -> bool:
 
 	var parsed = JSON.parse_string(validate_text)
 	if not parsed or not _validate_save_schema(parsed):
-		push_error("Validazione salvataggio fallita")
+		var section: String="schema"
+		if parsed is Dictionary:
+			if parsed.has("operations") and not preload("res://scripts/economy/yard_operations.gd").validate(parsed.operations,_game_state,parsed): section="operations"
+			elif parsed.has("local_expedition") and not preload("res://scripts/save/expedition_snapshot.gd").validate(parsed.local_expedition,_game_state,parsed): section="local_expedition"
+		push_error("Validazione salvataggio fallita: "+section)
 		save_completed.emit(false, "")
 		return false
 
@@ -262,6 +266,8 @@ func _validate_save_schema(data: Variant) -> bool:
 			return false
 	if data.has("operations") and not preload("res://scripts/economy/yard_operations.gd").validate(data.operations,_game_state,data):
 		return false
+	for item in data.get("operations",{}).get("crafting",{}).get("objects",{}).values():
+		if int(item.get("bales",0))>0 and not data.get("press",{}).get("owned",false): return false
 	if data.has("local_expedition") and not preload("res://scripts/save/expedition_snapshot.gd").validate(data.local_expedition,_game_state,data):
 		return false
 	return true

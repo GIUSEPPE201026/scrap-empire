@@ -21,24 +21,39 @@ static func ingredient(parent: Node, caption: String, owned: int, required: int,
 	row.add_child(label("%d / %d" % [owned,required],19,symbol.modulate))
 
 static func details(parent: Node, text_value: String, caption: String = "Dettagli") -> Label:
+	var paragraphs: PackedStringArray=[]
+	for paragraph in text_value.split("\n\n"): paragraphs.append(Localization.text(paragraph))
+	text_value="\n\n".join(paragraphs)
 	var column = VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	parent.add_child(column)
 	var toggle = Button.new()
-	toggle.text = caption+"  +"
+	toggle.text = Localization.text(caption)+"  +"
+	toggle.clip_text=true
 	toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	toggle.flat = true
 	toggle.add_theme_font_size_override("font_size",14)
 	toggle.add_theme_color_override("font_color",Color("#9db4bc"))
 	column.add_child(toggle)
+	var scroll=ScrollContainer.new()
+	scroll.set_meta("detail_fold",true)
+	scroll.custom_minimum_size=Vector2(0,96)
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	column.add_child(scroll)
 	var body = label(text_value,15,Color("#b9c8ce"))
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	body.hide()
-	column.add_child(body)
+	scroll.add_child(body)
+	scroll.hide()
+	scroll.visibility_changed.connect(func():
+		toggle.text=Localization.text(caption)+("  −" if scroll.visible else "  +")
+	)
 	toggle.pressed.connect(func():
-		body.visible = not body.visible
-		toggle.text = caption+("  −" if body.visible else "  +")
+		var expand: bool=not scroll.visible
+		for other in toggle.get_viewport().find_children("*","ScrollContainer",true,false):
+			if other.get_meta("detail_fold",false): other.hide()
+		scroll.visible=expand
 	)
 	return body
 
@@ -74,6 +89,7 @@ static func label(text_value: String, font_size: int, color: Color = Color("#f1e
 
 static func button_style(button: Button, primary: bool = false) -> void:
 	SYMBOLS.compact(button)
+	var model_icon: bool=button.icon!=null and button.icon.resource_path.ends_with(".png")
 	button.expand_icon=true
 	button.add_theme_constant_override("icon_max_width",22)
 	button.add_theme_font_size_override("font_size", 16)
@@ -97,7 +113,7 @@ static func button_style(button: Button, primary: bool = false) -> void:
 	button.add_theme_color_override("font_focus_color", Color("#18232b") if primary else Color.WHITE)
 	button.add_theme_color_override("font_pressed_color", Color("#18232b") if primary else Color.WHITE)
 	for state in ["normal","hover","pressed","focus"]:
-		button.add_theme_color_override("icon_"+state+"_color",Color("#18232b") if primary else Color("#d7e5e7"))
+		button.add_theme_color_override("icon_"+state+"_color",Color.WHITE if model_icon else (Color("#18232b") if primary else Color("#d7e5e7")))
 	button.add_theme_color_override("icon_disabled_color",Color("#6d858e"))
 	SYMBOLS.visual_action(button)
 

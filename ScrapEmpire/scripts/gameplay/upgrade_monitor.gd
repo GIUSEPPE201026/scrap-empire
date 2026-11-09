@@ -48,6 +48,7 @@ func _ready() -> void:
 	GameState.credits_changed.connect(_passive_economy)
 	GameState.deposit_changed.connect(_passive_deposit)
 	GameState.operations_changed.connect(_queue_passive_refresh)
+	Localization.language_changed.connect(_queue_passive_refresh)
 	build_screen()
 
 func open(player: Node3D) -> void:
@@ -132,13 +133,13 @@ func build_screen() -> void:
 	heading.add_child(title)
 	title.add_child(ui.label("UFFICIO", 15, Color("#8da9aa")))
 	title.add_child(ui.label("Riva Secca" if active_page=="career" else "Ricerca pezzi" if active_page=="specific" else ("Commesse" if active_page == "orders" else ("Impianti" if active_page == "modules" else "Equipaggiamento")), 28, Color("#f0dfbd")))
-	var wallet = ui.label("%d Bulloni" % GameState.team_credits, 22, Color("#edbc60"))
+	var wallet = ui.label(Localization.text("%d Bulloni") % GameState.team_credits, 22, Color("#edbc60"))
 	heading.add_child(wallet)
 	column.add_child(HSeparator.new())
 	var navigation = HBoxContainer.new()
 	navigation.add_theme_constant_override("separation", 12)
 	column.add_child(navigation)
-	for page in [["career","DIARIO"], ["tools", "DOTAZIONI"], ["modules", "OFFICINA"], ["orders", "COMMESSE  ·  %d / %d" % [GameState.completed_orders.size(), GameState.order_defs.size()]],["specific","RICHIESTE"]]:
+	for page in [["career","DIARIO"], ["tools", "DOTAZIONI"], ["modules", "OFFICINA"], ["orders", Localization.format_text("COMMESSE  ·  %d / %d", [GameState.completed_orders.size(), GameState.order_defs.size()])],["specific","RICHIESTE"]]:
 		var tab = Button.new()
 		tab.text = page[1]
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -196,7 +197,7 @@ func _build_modules(column: VBoxContainer) -> void:
 	rows.add_theme_constant_override("separation", 10)
 	scroll.add_child(rows)
 	for id in GameState.module_defs:
-		var category: String = "vehicles" if id in ["motor","suspension","cargo_rack","brakes","tyres"] else ("production" if id in ["press_drive","workbench","assembly"] else "recovery")
+		var category: String = "vehicles" if id in ["motor","suspension","cargo_rack","brakes","tyres","bike_handling","tow_package","hydraulics","industrial_drive"] else ("production" if id in ["press_drive","workbench","assembly"] else "recovery")
 		if category!=module_category:
 			continue
 		var definition: Dictionary = GameState.module_defs[id]
@@ -215,7 +216,8 @@ func _build_modules(column: VBoxContainer) -> void:
 		row.add_theme_constant_override("separation", 16)
 		panel.add_child(row)
 		var icon = TextureRect.new()
-		icon.texture = load("res://assets/ui/module_%s.svg" % definition.icon)
+		var icon_path: String="res://assets/ui/module_%s.svg" % definition.icon
+		icon.texture = load(icon_path) if ResourceLoader.exists(icon_path) else preload("res://scripts/ui/menu_symbols.gd").icon(definition.icon,128)
 		var preview: String={"motor":"engine","suspension":"suspension_kit","cargo_rack":"cargo_kit","press_drive":"press_kit","workbench":"toolbox","gloves":"hands","harness":"handcart","headlamp":"work_lamp","brakes":"wheel","tyres":"rubber","assembly":"bench_compressor"}.get(id,"")
 		if not preview.is_empty(): icon.texture=preload("res://scripts/ui/salvage_ui.gd").image(preview)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -225,7 +227,7 @@ func _build_modules(column: VBoxContainer) -> void:
 		var details = VBoxContainer.new()
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(details)
-		var title_label=ui.label("%s  ·  %d/%d" % [definition.name,level,definition.levels.size()],18)
+		var title_label=ui.label(Localization.format_text("%s  ·  %d/%d", [definition.name,level,definition.levels.size()]),18)
 		title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		details.add_child(title_label)
 		details.custom_minimum_size.x = 225
@@ -234,15 +236,18 @@ func _build_modules(column: VBoxContainer) -> void:
 		var effect: String = "Completo"
 		if level < definition.levels.size():
 			var next: Dictionary = definition.levels[level]
-			effect = ("Prestazioni +%d%%" % roundi((float(next.effect) - 1) * 100)) if id in ["motor", "suspension"] else ("Tempo −%d%%" % roundi((1 - float(next.effect)) * 100))
+			effect = (Localization.text("Prestazioni +%d%%") % roundi((float(next.effect) - 1) * 100)) if id in ["motor", "suspension"] else (Localization.text("Tempo −%d%%") % roundi((1 - float(next.effect)) * 100))
 			if definition.get("unit","") in ["braking","grip"]:
-				effect = "%s +%d%%" % ["Frenata" if definition.unit=="braking" else "Aderenza",roundi((float(next.effect)-1)*100)]
+				effect = Localization.format_text("%s +%d%%", ["Frenata" if definition.unit=="braking" else "Aderenza",roundi((float(next.effect)-1)*100)])
 			if definition.get("unit","") == "m":
-				effect = "Portata: %d m" % next.effect
+				effect = Localization.text("Portata: %d m") % next.effect
 			if definition.get("unit","") == "multiplier":
-				effect = "Traino +%d%%" % roundi((float(next.effect)-1)*100)
+				effect = Localization.text("Traino +%d%%") % roundi((float(next.effect)-1)*100)
 			if definition.get("unit","") == "kg":
-				effect = "Cassone: %d kg" % next.effect
+				effect = Localization.text("Cassone: %d kg") % next.effect
+			if definition.get("unit","") in ["handling","towing","speed"]:
+				var label: String={"handling":"Controllo","towing":"Traino","speed":"Rapidità"}[definition.unit]
+				effect=Localization.format_text("%s +%d%%", [label,roundi((float(next.effect)-1)*100)])
 		details.add_child(ui.label(effect,18,Color("#83c4ac")))
 		if not requirement.is_empty() and not requirement.begins_with("Servono"):
 			panel.tooltip_text+="\n"+requirement
@@ -299,7 +304,7 @@ func _build_career(column: VBoxContainer) -> void:
 	preload("res://scripts/ui/office_pages.gd").career(self,column)
 
 func _content_signature() -> String:
-	return JSON.stringify([active_page,GameState.team_credits,GameState.team_upgrade_levels,GameState.workshop_modules,GameState.completed_orders,GameState.team_deposit_counts,GameState.press_bales,GameState.press_owned,GameState.yard_level,GameState.vehicle_level,GameState.operations.active_delivery,GameState.operations.deliveries,GameState.specifics.payload(),GameState.story.data()])
+	return JSON.stringify([Localization.language,active_page,GameState.team_credits,GameState.team_upgrade_levels,GameState.workshop_modules,GameState.completed_orders,GameState.team_deposit_counts,GameState.press_bales,GameState.press_owned,GameState.yard_level,GameState.vehicle_level,GameState.operations.active_delivery,GameState.operations.deliveries,GameState.specifics.payload(),GameState.story.data()])
 
 func _passive_deposit(_credits: int, _counts: Dictionary) -> void:
 	_queue_passive_refresh()

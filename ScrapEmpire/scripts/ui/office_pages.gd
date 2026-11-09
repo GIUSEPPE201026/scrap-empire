@@ -38,13 +38,13 @@ static func tools(monitor: Node, column: VBoxContainer) -> void:
 		if not next.is_empty():
 			if category=="bag": effect="%d → %d kg" % [GameState.get_inventory_capacity(1),next.capacity_kg]
 			elif category=="tool": effect="Elettronica / rame" if current==0 else "Vetro / telai"
-			else: effect="Velocità +%.0f%%" % ((next.speed_multiplier-1)*100)
+			else: effect=Localization.text("Velocità +%.0f%%") % ((next.speed_multiplier-1)*100)
 		card.add_child(ART.label(effect,20,UI.ORANGE))
 		var purchase=Button.new()
 		purchase.icon=ART.SYMBOLS.icon("coin")
 		purchase.disabled=not monitor.active or cost<0 or GameState.team_credits<cost
 		if monitor.active: purchase.pressed.connect(monitor.owner_player._buy_development.bind(category))
-		UI.action(purchase,"Completo" if cost<0 else "Acquista · %d" % cost,not purchase.disabled)
+		UI.action(purchase,"Completo" if cost<0 else Localization.text("Acquista · %d") % cost,not purchase.disabled)
 		card.add_child(purchase)
 		monitor.buy_buttons[category]=purchase
 		if category in ["bag","tool"]:
@@ -69,7 +69,7 @@ static func orders(monitor: Node, column: VBoxContainer) -> void:
 		monitor.buy_buttons.merge(preload("res://scripts/ui/yard_panels.gd").delivery_content(list,monitor.owner_player,monitor.active))
 		close_button(monitor,column)
 		return
-	column.add_child(ART.label("AVVIAMENTO · %d / %d" % [GameState.completed_orders.size()+1,GameState.order_defs.size()],14,UI.MUTED))
+	column.add_child(ART.label(Localization.format_text("AVVIAMENTO · %d / %d", [GameState.completed_orders.size()+1,GameState.order_defs.size()]),14,UI.MUTED))
 	var body=HBoxContainer.new()
 	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation",18)
@@ -79,7 +79,7 @@ static func orders(monitor: Node, column: VBoxContainer) -> void:
 	var title=ART.label(order.name.to_upper(),24,UI.PAPER)
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	summary.add_child(title)
-	summary.add_child(ART.label("+%d Bulloni" % order.reward,25,UI.ORANGE))
+	summary.add_child(ART.label(Localization.text("+%d Bulloni") % order.reward,25,UI.ORANGE))
 	var requirement=ART.label(GameState.order_requirement(),16,UI.MUTED)
 	requirement.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	summary.add_child(requirement)
@@ -126,7 +126,7 @@ static func career(monitor: Node, column: VBoxContainer) -> void:
 	var note=ART.label(step.detail,18,UI.PAPER)
 	note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	task.add_child(note)
-	ART.details(task,chapter.letter,"Lettera · "+chapter.sender)
+	ART.details(task,chapter.letter,Localization.text("Lettera · ")+chapter.sender)
 	var open=Button.new()
 	open.disabled=not monitor.active
 	if monitor.active: open.pressed.connect(monitor.owner_player._open_career)

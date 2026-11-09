@@ -9,9 +9,6 @@ const SYMBOLS=preload("res://scripts/ui/menu_symbols.gd")
 static var _images: Dictionary={}
 
 static func image(kind: String) -> Texture2D:
-	if kind=="bag": return SYMBOLS.icon("bag",128)
-	if kind in ["yard_wall","yard_canopy","yard_platform"]:
-		return SYMBOLS.icon(kind,128)
 	var id: String={"cutters":"bolt_cutters","suspension":"suspension_kit","truck":"buggy","light":"work_lamp","radio":"restored_radio","repair":"repair_kit","bag":"bag_frame","bench":"garden_bench","press":"press_kit","box":"field_depot"}.get(kind,kind)
 	if not _images.has(id):
 		var path: String="res://assets/ui/catalog/%s.png" % id

@@ -81,7 +81,7 @@ func tick(delta: float) -> void:
 		if not state.ops._finish(before):
 			_retry=3.0
 			return
-		state.machine_message.emit("PRONTO IN GARAGE · "+", ".join(finished))
+		state.machine_message.emit(Localization.text("PRONTO IN GARAGE · ")+", ".join(finished))
 
 static func validate(value: Variant, game, crafting: Dictionary, assembly_level: int = 0) -> bool:
 	if assembly_level<0 or assembly_level>game.module_defs.assembly.levels.size():

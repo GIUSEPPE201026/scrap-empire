@@ -33,6 +33,9 @@ func _ready() -> void:
 		for light in headlights:
 			light.position=Vector3(0,1.1,-0.88)
 	if DisplayServer.get_name()=="headless": return
+	if vehicle_kind=="dirtbike":
+		art.beam(visual,Vector3(0,0.65,0.7),Vector3(0,0.55,1.1),0.07,art.STEEL)
+		art.cylinder(visual,0.09,0.13,Vector3(0,0.55,1.1),art.YELLOW,16)
 	if vehicle_kind=="skateboard":
 		art.beveled_box(visual,Vector3(0.43,0.055,0.94),Vector3(0,0.17,0),Color("#bc6548"),true)
 		art.beveled_box(visual,Vector3(0.40,0.012,0.80),Vector3(0,0.205,0),art.GRAPHITE)

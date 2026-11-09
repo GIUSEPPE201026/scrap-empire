@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Optional, Dict, List
 
 # Configurazione
-GODOT_PATH = r"C:\Users\ASUS\Desktop\scrap game\tools\Godot_v4.3-stable_win64.exe"
-PROJECT_PATH = r"C:\Users\ASUS\Desktop\scrap game\ScrapEmpire"
+PROJECT_PATH = str(Path(__file__).resolve().parents[2])
+GODOT_PATH = os.environ.get("GODOT_PATH", str(Path(PROJECT_PATH) / "tools" / "Godot_v4.3-stable_win64_console.exe"))
 TEST_SCENE = "res://scripts/test/test_multiplayer_integration.tscn"  # Scena di test
 HEADLESS_ARGS = ["--headless", "--no-window"]
 TEST_TIMEOUT = 60  # secondi
